@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌀 ORAKEL · arg.sync · 5 Module · iki1uc</title>
+  <title>🌀 ORAKEL · arg.sync · 6 Module · inkl. NEWADA</title>
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -69,12 +69,13 @@
     .led.pulse { background:#f0d080; animation:pulse 1.2s infinite; }
     .led.off { background:#2a4a5a; }
     .led.sync { background:#b388ff; box-shadow:0 0 12px #b388ff; }
+    .led.newada { background:#ff6b6b; box-shadow:0 0 12px #ff6b6b; }
     @keyframes pulse { 0%,100%{opacity:.4;transform:scale(.8)} 50%{opacity:1;transform:scale(1.2)} }
 
     /* ─── MODUL-KACHELN ────────────────────────────────────────── */
     .module-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
       margin-bottom: 16px;
     }
@@ -107,6 +108,9 @@
     }
     .module-card .led-mini.on { background:#8cf0d0; box-shadow:0 0 6px #8cf0d0; }
     .module-card .led-mini.off { background:#2a4a5a; }
+
+    .module-card.newada { border-color:rgba(255,107,107,0.15); }
+    .module-card.newada.active { border-color:#ff6b6b; box-shadow:0 0 24px rgba(255,107,107,0.1); }
 
     /* ─── IFRAME-CONTAINER ────────────────────────────────────── */
     .iframe-wrap {
@@ -190,6 +194,8 @@
     button.sync:hover { background:rgba(179,136,255,0.06); }
     button.danger { border-color:rgba(255,80,80,0.08); color:#d06060; }
     button.danger:hover { background:rgba(255,80,80,0.04); }
+    button.newada { border-color:rgba(255,107,107,0.15); color:#ff6b6b; }
+    button.newada:hover { background:rgba(255,107,107,0.06); }
 
     .log-box {
       background: rgba(0,0,0,0.2);
@@ -210,6 +216,7 @@
     .log-box .msg.ok { color:#8cf0d0; }
     .log-box .msg.sync { color:#b388ff; }
     .log-box .msg.warn { color:#f0d080; }
+    .log-box .msg.newada { color:#ff6b6b; }
 
     .footer {
       display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:10px;
@@ -218,6 +225,7 @@
     }
     .footer .gold { color:#f0d080; }
     .footer .stat { display:flex; align-items:center; gap:4px; }
+    .footer .newada { color:#ff6b6b; }
 
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-track { background:#080c12; }
@@ -229,15 +237,16 @@
 <div class="container">
 
   <header>
-    <h1>🌀 ORAKEL · arg.sync <small>iki1uc · 5 Module</small></h1>
+    <h1>🌀 ORAKEL · arg.sync <small>iki1uc · 6 Module · NEWADA</small></h1>
     <div class="status-leds">
       <span><span class="led on" id="ledSystem"></span> SYSTEM</span>
       <span><span class="led sync" id="ledSync"></span> SYNC</span>
       <span><span class="led" id="ledModule"></span> MODUL</span>
+      <span><span class="led newada" id="ledNewada"></span> NEWADA</span>
     </div>
   </header>
 
-  <!-- MODUL-KACHELN -->
+  <!-- MODUL-KACHELN (6) -->
   <div class="module-grid" id="moduleGrid">
     <div class="module-card" data-module="api.cntrl">
       <div class="icon">🔌</div>
@@ -259,9 +268,14 @@
       <div class="name">ram</div>
       <div class="status-badge bereit"><span class="led-mini on"></span> bereit</div>
     </div>
-    <div class="module-card" data-module="3-81-9">
+    <div class="module-card" data-module="3">
       <div class="icon">🌀</div>
       <div class="name">3‑81‑9</div>
+      <div class="status-badge bereit"><span class="led-mini on"></span> bereit</div>
+    </div>
+    <div class="module-card newada" data-module="NEWADA">
+      <div class="icon">🌵</div>
+      <div class="name">NEWADA</div>
       <div class="status-badge bereit"><span class="led-mini on"></span> bereit</div>
     </div>
   </div>
@@ -279,21 +293,23 @@
   <!-- SYNC-BAR -->
   <div class="sync-bar">
     <span class="label"><span class="led sync" style="display:inline-block;"></span> arg.sync</span>
-    <input class="arg-input" id="argInput" placeholder="arg.sync nachricht…" value="sync:orakel">
+    <input class="arg-input" id="argInput" placeholder="Nachricht an Modul…" value="sync:orakel">
     <button class="sync" id="btnSync">🔄 SYNC</button>
     <button class="primary" id="btnBroadcast">📡 BROADCAST</button>
+    <button class="newada" id="btnNewadaStatus">🌵 NEWADA-Status</button>
     <button id="btnResetAll">⟲ RESET ALLE</button>
   </div>
 
   <!-- LOG -->
   <div class="log-box" id="logBox">
-    <div class="entry"><span class="time">[INIT]</span> <span class="msg ok">🌀 ORAKEL · arg.sync · 5 Module geladen</span></div>
+    <div class="entry"><span class="time">[INIT]</span> <span class="msg ok">🌀 ORAKEL · 6 Module · arg.sync · NEWADA integriert</span></div>
   </div>
 
   <div class="footer">
     <span class="stat"><span class="gold">★</span> ORAKEL · arg.sync · Funktions-Träger</span>
-    <span class="stat">🔷 <span id="fModuleCount">0</span>/5 aktiv</span>
+    <span class="stat">🔷 <span id="fModuleCount">0</span>/6 aktiv</span>
     <span class="stat">⚡ <span id="fSyncCount">0</span> SYNCs</span>
+    <span class="stat newada">🌵 NEWADA: <span id="fNewadaStatus">bereit</span></span>
   </div>
 
 </div>
@@ -301,18 +317,17 @@
 <script>
 "use strict";
 /* ================================================================
-   ORAKEL · arg.sync
-   Funktions-Träger: Lädt 5 Module (Ordner) und synchronisiert sie
-   über den zentralen arg.sync-Mechanismus.
+   ORAKEL · arg.sync – erweitert mit NEWADA und etage.html-Brücke
    ================================================================ */
 
 // ─── KONFIG ──────────────────────────────────────────────────────
 const MODULES = [
-  { id: 'api.cntrl', label: 'api.cntrl', icon: '🔌', path: 'api.cntrl/index.html' },
-  { id: 'cpu',       label: 'cpu',       icon: '💻', path: 'cpu/index.html' },
-  { id: 'gpu',       label: 'gpu',       icon: '🎮', path: 'gpu/index.html' },
-  { id: 'ram',       label: 'ram',       icon: '🧠', path: 'ram/index.html' },
-  { id: '3-81-9',    label: '3‑81‑9',    icon: '🌀', path: '3/index.html' }  // Annahme: 3-81-9 ist Ordner "3"
+  { id: 'api.cntrl', label: 'api.cntrl', icon: '🔌', path: 'api.cntrl/etage.html' },
+  { id: 'cpu',       label: 'cpu',       icon: '💻', path: 'cpu/etage.html' },
+  { id: 'gpu',       label: 'gpu',       icon: '🎮', path: 'gpu/etage.html' },
+  { id: 'ram',       label: 'ram',       icon: '🧠', path: 'ram/etage.html' },
+  { id: '3',         label: '3‑81‑9',    icon: '🌀', path: '3/etage.html' },
+  { id: 'NEWADA',    label: 'NEWADA',    icon: '🌵', path: 'NEWADA/etage.html' }
 ];
 
 // ─── STATE ──────────────────────────────────────────────────────
@@ -320,7 +335,7 @@ const state = {
   activeModule: null,
   syncCount: 0,
   moduleStatus: {},
-  logEntries: []
+  newadaStatus: 'bereit'
 };
 
 MODULES.forEach(m => state.moduleStatus[m.id] = 'bereit');
@@ -335,7 +350,7 @@ const argInput = document.getElementById('argInput');
 // ─── LOG ─────────────────────────────────────────────────────────
 function log(msg, type = '') {
   const time = new Date().toLocaleTimeString('de-DE');
-  const cls = ['ok','sync','warn'].includes(type) ? type : '';
+  const cls = ['ok','sync','warn','newada'].includes(type) ? type : '';
   const entry = document.createElement('div');
   entry.className = 'entry';
   entry.innerHTML = `<span class="time">[${time}]</span> <span class="msg ${cls}">${msg}</span>`;
@@ -372,8 +387,6 @@ function loadModule(moduleId) {
     badge.innerHTML = '<span class="led-mini on"></span> geladen';
   }
 
-  // Sync-Zähler zurücksetzen (pro Modul-Wechsel optional)
-  // Wir lassen ihn laufen
   updateFooter();
 }
 
@@ -385,7 +398,7 @@ function doSync(message) {
   document.getElementById('ledSync').className = 'led sync';
   setTimeout(() => document.getElementById('ledSync').className = 'led', 500);
 
-  // Broadcast an alle geladenen iframes (postMessage)
+  // An die Etage (iframe) senden
   const iframe = document.getElementById('moduleFrame');
   if (iframe && iframe.contentWindow) {
     try {
@@ -398,21 +411,39 @@ function doSync(message) {
     log('⚠️ Kein aktives Modul zum SYNCen', 'warn');
   }
 
-  // Auch an alle anderen offenen Fenster? Hier nur das aktive.
-  // Zusätzlich können wir die Nachricht im argInput speichern
   argInput.value = msg;
   updateFooter();
 }
 
 function broadcastSync() {
-  // Sendet an alle Module (auch nicht geladene) über eine generische Methode
-  // Hier: nur an aktives, da nur ein iframe sichtbar
   doSync(argInput.value.trim() || 'broadcast:orakel');
+}
+
+// ─── NEWADA-STATUS ──────────────────────────────────────────────
+function toggleNewadaStatus() {
+  if (state.newadaStatus === 'bereit') {
+    state.newadaStatus = 'aktiv 🌵';
+    document.getElementById('ledNewada').className = 'led newada pulse';
+    log('🌵 NEWADA · Raum-Zeit-Krümmung aktiviert', 'newada');
+  } else if (state.newadaStatus === 'aktiv 🌵') {
+    state.newadaStatus = 'stabilisieren…';
+    log('🌵 NEWADA · Stabilisierung läuft…', 'newada');
+    setTimeout(() => {
+      state.newadaStatus = 'bereit';
+      document.getElementById('ledNewada').className = 'led newada';
+      log('🌵 NEWADA · wieder bereit', 'ok');
+      updateFooter();
+    }, 1500);
+  } else {
+    state.newadaStatus = 'bereit';
+    document.getElementById('ledNewada').className = 'led newada';
+    log('🌵 NEWADA · zurückgesetzt', 'ok');
+  }
+  updateFooter();
 }
 
 // ─── RESET ALLE ─────────────────────────────────────────────────
 function resetAll() {
-  // Alle Module zurücksetzen (Status auf bereit)
   MODULES.forEach(m => {
     state.moduleStatus[m.id] = 'bereit';
     const card = document.querySelector(`.module-card[data-module="${m.id}"]`);
@@ -428,6 +459,8 @@ function resetAll() {
   placeholder.style.display = 'flex';
   document.getElementById('ledModule').className = 'led off';
   state.syncCount = 0;
+  state.newadaStatus = 'bereit';
+  document.getElementById('ledNewada').className = 'led newada';
   log('⟲ Alle Module zurückgesetzt', 'warn');
   updateFooter();
 }
@@ -437,41 +470,26 @@ function updateFooter() {
   const active = MODULES.filter(m => state.moduleStatus[m.id] === 'geladen').length;
   document.getElementById('fModuleCount').textContent = active;
   document.getElementById('fSyncCount').textContent = state.syncCount;
+  document.getElementById('fNewadaStatus').textContent = state.newadaStatus;
 }
 
-// ─── EVENT-LISTENER ─────────────────────────────────────────────
-// Modul-Klicks
-document.querySelectorAll('.module-card').forEach(card => {
-  card.addEventListener('click', () => {
-    const modId = card.dataset.module;
-    if (state.activeModule === modId) {
-      // Wenn schon aktiv, neu laden?
-      loadModule(modId); // reload
-    } else {
-      loadModule(modId);
-    }
-  });
-});
-
-// SYNC-Buttons
-document.getElementById('btnSync').addEventListener('click', () => doSync());
-document.getElementById('btnBroadcast').addEventListener('click', broadcastSync);
-document.getElementById('btnResetAll').addEventListener('click', resetAll);
-
-// Enter im argInput
-argInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') doSync();
-});
-
-// ─── POSTMESSAGE-EMPFAENGER (von Modulen) ──────────────────────
+// ─── POSTMESSAGE-EMPFAENGER (von Etagen) ──────────────────────
 window.addEventListener('message', (event) => {
-  // Nur von eigenen iframes akzeptieren (etwa)
+  // Nur von unseren iframes akzeptieren
   if (event.source !== frame.contentWindow) return;
   const data = event.data;
   if (data && data.type === 'arg.sync') {
-    log(`📨 Empfangen von Modul: ${data.payload}`, 'sync');
-    // Optional: argInput aktualisieren
+    log(`📨 Empfangen von ${data.from || 'Modul'}: ${data.payload}`, 'sync');
     if (data.payload) argInput.value = data.payload;
+    // Wenn von NEWADA, speziell behandeln
+    if (data.from === 'NEWADA') {
+      log(`🌵 NEWADA-Nachricht: ${data.payload}`, 'newada');
+    }
+  }
+  if (data && data.type === 'etage.ready') {
+    log(`✅ Etage ${data.from} ist bereit`, 'ok');
+    state.moduleStatus[data.from] = 'geladen';
+    updateFooter();
   }
 });
 
@@ -480,20 +498,44 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 's' || e.key === 'S') { e.preventDefault(); doSync(); }
   if (e.key === 'b' || e.key === 'B') { e.preventDefault(); broadcastSync(); }
   if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetAll(); }
-  // Ziffern 1-5 für Module
+  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); toggleNewadaStatus(); }
+  // Ziffern 1-6 für Module
   const idx = parseInt(e.key) - 1;
   if (idx >= 0 && idx < MODULES.length) {
     loadModule(MODULES[idx].id);
   }
 });
 
+// ─── EVENT-LISTENER ─────────────────────────────────────────────
+document.querySelectorAll('.module-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const modId = card.dataset.module;
+    if (state.activeModule === modId) {
+      loadModule(modId); // reload
+    } else {
+      loadModule(modId);
+    }
+  });
+});
+
+document.getElementById('btnSync').addEventListener('click', () => doSync());
+document.getElementById('btnBroadcast').addEventListener('click', broadcastSync);
+document.getElementById('btnNewadaStatus').addEventListener('click', toggleNewadaStatus);
+document.getElementById('btnResetAll').addEventListener('click', resetAll);
+
+argInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doSync();
+});
+
 // ─── INIT ──────────────────────────────────────────────────────
-log('🌀 ORAKEL · arg.sync · 5 Module bereit', 'ok');
-log('⌨️  1-5 = Module  |  s = SYNC  |  b = BROADCAST  |  r = RESET', 'warn');
+log('🌀 ORAKEL · 6 Module · arg.sync · NEWADA integriert', 'ok');
+log('⌨️  1-6 = Module  |  s = SYNC  |  b = BROADCAST  |  n = NEWADA  |  r = RESET', 'warn');
 updateFooter();
 
-// Optional: Erstes Modul automatisch laden?
-// setTimeout(() => loadModule(MODULES[0].id), 300);
+// ─── DEMO: NEWADA nach 1 Sekunde begrüßen ──────────────────────
+setTimeout(() => {
+  log('🌵 NEWADA ist bereit – klicke auf die Kachel oder drücke N', 'newada');
+}, 600);
 </script>
 </body>
 </html>
