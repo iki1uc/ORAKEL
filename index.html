@@ -1,757 +1,959 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌀 STAGE‑Reich · Index · Corridor · Legitimation</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>◈ api.cntrl · co.mind · co.spu · co.cache · natural</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --bg:#04070c; --bg2:#080e18; --bg3:#0c1622;
+    --fg:#c8d8e8; --dim:#5a7288; --dim2:#2a3644;
+    --gold:#f0d080; --gold2:#ffe9b0;
+    --violet:#b388ff; --cyan:#6cf; --green:#8cf0d0;
+    --pink:#ff9ec4; --red:#ff6b8a; --orange:#ffa040;
+    --cpu:#8cf0d0;   /* mind  = grün */
+    --gpu:#b388ff;   /* spu   = violett */
+    --ram:#f0d080;   /* cache = gold */
+    --nat:#6cf;      /* natural = cyan */
+    --line:rgba(120,180,220,0.08);
+    --line2:rgba(120,180,220,0.04);
+    --mono:'Consolas','Courier New',monospace;
+    --serif:'Yu Mincho','Hiragino Mincho ProN',serif;
+  }
+  html,body{height:100%;}
+  body{
+    background:#04070c;
+    background-image:radial-gradient(ellipse at 50% 0%,#0c1a2c 0%,#04070c 55%,#010205 100%);
+    color:var(--fg);
+    font-family:var(--mono);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
 
-  <!-- ========================================================= -->
-  <!-- KERN-MODULE (global, werden von allen Etagen genutzt)     -->
-  <!-- ========================================================= -->
-  <script src="coord.js"></script>
-  <script src="aufzug.js"></script>
-  <script src="OS_CORE.js"></script>
+  /* ═══ LAYOUT ═══ */
+  #hub{
+    display:flex; flex-direction:column;
+    height:100vh;
+    padding:6px 10px 8px;
+    gap:5px;
+    max-width:1800px; margin:0 auto;
+  }
 
-  <!-- ========================================================= -->
-  <!-- ACHSEN-MODULE (b/h/t – HDF-Cube-Grundlage)               -->
-  <!-- ========================================================= -->
-  <script src="b/axiom.map.js"></script>
-  <script src="h/axiom.map.js"></script>
-  <script src="t/axiom.map.js"></script>
+  /* ═══ TOP ═══ */
+  #top{
+    display:flex; flex-wrap:wrap;
+    align-items:center; gap:9px;
+    padding:6px 12px;
+    background:var(--bg2);
+    border:1px solid var(--line);
+    border-radius:5px;
+    font-size:10px;
+    flex-shrink:0;
+  }
+  #top .brand{
+    font-weight:bold; color:var(--gold);
+    letter-spacing:2px; font-size:12px;
+    font-family:var(--serif);
+  }
+  #top .brand small{
+    color:var(--violet);
+    font-size:9px;
+    letter-spacing:1px;
+    margin-left:5px;
+    font-family:var(--mono);
+  }
+  #top .sep{width:1px;height:13px;background:var(--line2);}
+  #top .stat{color:var(--dim);font-size:10px;}
+  #top .stat b{color:var(--fg);font-weight:bold;}
+  #top .stat b.ok{color:var(--green);}
+  #top .stat b.warn{color:var(--gold);}
+  #top .stat b.cy{color:var(--cyan);}
+  #top .stat b.vi{color:var(--violet);}
+  #top .stat b.cpu{color:var(--cpu);}
+  #top .stat b.gpu{color:var(--gpu);}
+  #top .stat b.ram{color:var(--ram);}
+  #top .spacer{margin-left:auto;}
+  #top #clock{color:var(--cyan);font-weight:bold;}
 
-  <!-- ========================================================= -->
-  <!-- NC-SUITE (Figur, Kraft, Space, Time)                     -->
-  <!-- ========================================================= -->
-  <script src="NC_figur.js"></script>
-  <script src="NC_kraft.js"></script>
-  <script src="NC_space.js"></script>
-  <script src="NC_time.js"></script>
-  <script src="NC.suite"></script> <!-- bündelt die vier Module -->
+  /* ═══ KERNEL-STRIP (co.mind / co.spu / co.cache) ═══ */
+  #kernels{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:6px;
+    flex-shrink:0;
+  }
+  @media(max-width:900px){ #kernels{grid-template-columns:1fr;} }
 
-  <!-- ========================================================= -->
-  <!-- VEC-MODULE (Vektoren & Koordinaten)                       -->
-  <!-- ========================================================= -->
-  <script src="vec.js"></script>
-  <script src="vec3.js"></script>
-  <script src="vec9.js"></script>
+  .kern{
+    background:var(--bg2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:8px 10px;
+    position:relative;
+    overflow:hidden;
+    cursor:pointer;
+    transition:.25s;
+    min-height:88px;
+  }
+  .kern:hover{background:var(--bg3);}
+  .kern.cpu{border-left:3px solid var(--cpu);}
+  .kern.gpu{border-left:3px solid var(--gpu);}
+  .kern.ram{border-left:3px solid var(--ram);}
 
-  <style>
-    /* ==========================================================
-       GLOBALES STYLING – dunkel, konsolenhaft, übersichtlich
-       ========================================================== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  .kern .hd{
+    display:flex; justify-content:space-between;
+    align-items:center;
+    font-family:var(--serif);
+    letter-spacing:2px;
+    font-size:11px;
+    margin-bottom:5px;
+  }
+  .kern.cpu .hd{color:var(--cpu);}
+  .kern.gpu .hd{color:var(--gpu);}
+  .kern.ram .hd{color:var(--ram);}
+  .kern .hd .tag{
+    font-family:var(--mono);
+    font-size:8px;
+    letter-spacing:1px;
+    color:var(--dim);
+    background:var(--bg3);
+    padding:1px 6px;
+    border-radius:8px;
+  }
+  .kern .desc{
+    font-size:9px;
+    color:var(--dim);
+    margin-bottom:6px;
+  }
+  .kern .rows{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:2px 8px;
+    font-size:9.5px;
+  }
+  .kern .row{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px dashed var(--line2);
+    padding:1px 0;
+  }
+  .kern .row .k{color:var(--dim);}
+  .kern .row .v{font-weight:bold;color:var(--fg);}
+  .kern .pulse{
+    position:absolute;
+    top:8px; right:8px;
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--dim2);
+  }
+  .kern.cpu .pulse{background:var(--cpu);box-shadow:0 0 8px var(--cpu);}
+  .kern.gpu .pulse{background:var(--gpu);box-shadow:0 0 8px var(--gpu);}
+  .kern.ram .pulse{background:var(--ram);box-shadow:0 0 8px var(--ram);}
+  .kern .pulse.pulse-anim{animation:kpulse 1.2s ease-in-out infinite;}
+  @keyframes kpulse{0%,100%{opacity:.5;}50%{opacity:1;transform:scale(1.2);}}
 
-    body {
-      background: #0b0b0b;
-      color: #e0e0e0;
-      font-family: 'Consolas', 'Courier New', monospace;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-    }
+  .kern .bar{
+    height:3px;
+    background:var(--bg3);
+    border-radius:2px;
+    overflow:hidden;
+    margin-top:5px;
+  }
+  .kern .bar .f{
+    height:100%;
+    transition:width .35s;
+  }
+  .kern.cpu .bar .f{background:linear-gradient(90deg,#1a3a2a,var(--cpu));}
+  .kern.gpu .bar .f{background:linear-gradient(90deg,#2a1a4a,var(--gpu));}
+  .kern.ram .bar .f{background:linear-gradient(90deg,#3a2a0a,var(--ram));}
 
-    .container {
-      max-width: 1200px;
-      width: 100%;
-      padding: 24px 20px 30px;
-    }
+  /* ═══ MAIN: SPLIT (Natural + Station) ═══ */
+  #main{
+    display:grid;
+    grid-template-columns: 1fr 280px;
+    gap:6px;
+    flex:1;
+    min-height:0;
+  }
+  @media(max-width:900px){
+    #main{grid-template-columns:1fr;}
+  }
 
-    /* ─── HEADER ─────────────────────────────────────────────── */
-    .header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #2a3a4a;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-    }
+  /* ── NATURAL (iframe) ─────────────────── */
+  #natural{
+    background:var(--bg2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    overflow:hidden;
+    border-left:3px solid var(--nat);
+  }
+  #naturalHd{
+    display:flex; align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-bottom:1px solid var(--line);
+    font-size:10px;
+    letter-spacing:1px;
+    background:rgba(108,204,255,0.03);
+    flex-shrink:0;
+  }
+  #naturalHd .path{
+    color:var(--dim);
+    font-size:9.5px;
+  }
+  #naturalHd .path b{color:var(--nat);}
+  #naturalHd .mode{
+    margin-left:auto;
+    font-size:9px;
+    color:var(--dim);
+  }
+  #naturalHd .mode b{color:var(--green);}
+  #naturalFrame{
+    flex:1;
+    border:0;
+    background:var(--bg);
+    width:100%;
+    min-height:0;
+  }
 
-    .header h1 {
-      color: #6cf;
-      font-size: 26px;
-      font-weight: 300;
-      letter-spacing: 2px;
-    }
+  /* ── STATION (rechte Spalte) ─────────────── */
+  #station{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    min-height:0;
+    overflow-y:auto;
+  }
+  #station::-webkit-scrollbar{width:5px;}
+  #station::-webkit-scrollbar-thumb{background:var(--line);}
 
-    .header h1 small {
-      color: #5a7a8a;
-      font-size: 13px;
-      font-weight: 300;
-      letter-spacing: 1px;
-    }
+  .pane{
+    background:var(--bg2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:7px 9px;
+    flex-shrink:0;
+  }
+  .pane h3{
+    font-size:9px; letter-spacing:1.5px;
+    color:var(--violet);
+    text-transform:uppercase;
+    margin-bottom:5px;
+    padding-bottom:3px;
+    border-bottom:1px solid var(--line2);
+    display:flex; justify-content:space-between;
+    align-items:center;
+    font-family:var(--serif);
+    font-weight:normal;
+  }
+  .pane h3 .badge{
+    font-size:8px;
+    color:var(--dim);
+    background:var(--bg3);
+    padding:1px 6px;
+    border-radius:6px;
+    letter-spacing:0.5px;
+    font-family:var(--mono);
+  }
+  .pane h3 .badge.ok{color:var(--green);}
+  .pane h3 .badge.warn{color:var(--gold);}
 
-    .status-leds {
-      display: flex;
-      gap: 18px;
-      font-size: 12px;
-      color: #5a7a8a;
-    }
+  /* arg.sync rows */
+  .sync-row{
+    display:grid;
+    grid-template-columns:46px 1fr 42px;
+    gap:6px;
+    align-items:center;
+    padding:3px 0;
+    border-bottom:1px dashed var(--line2);
+    font-size:9.5px;
+  }
+  .sync-row:last-child{border-bottom:none;}
+  .sync-row .lbl{
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:1px;
+    font-weight:bold;
+  }
+  .sync-row .bar{
+    height:5px;
+    background:var(--bg3);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .sync-row .bar .f{
+    height:100%;
+    transition:width .35s;
+  }
+  .sync-row .bar .f.arg{background:linear-gradient(90deg,#1a3a2a,var(--green));}
+  .sync-row .bar .f.xarg{background:linear-gradient(90deg,#3a2a0a,var(--gold));}
+  .sync-row .bar .f.tmparg{background:linear-gradient(90deg,#2a1a4a,var(--violet));}
+  .sync-row .val{text-align:right;font-weight:bold;font-size:9px;}
+  .sync-row .val.arg{color:var(--green);}
+  .sync-row .val.xarg{color:var(--gold);}
+  .sync-row .val.tmparg{color:var(--violet);}
 
-    .status-leds span {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+  /* Ordner-Navigator */
+  .nav-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:3px;
+  }
+  .nav-item{
+    background:var(--bg3);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:4px 6px;
+    font-size:9px;
+    cursor:pointer;
+    transition:.15s;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:4px;
+  }
+  .nav-item:hover{
+    border-color:var(--nat);
+    background:rgba(108,204,255,0.06);
+  }
+  .nav-item.active{
+    border-color:var(--nat);
+    background:rgba(108,204,255,0.12);
+    color:var(--nat);
+  }
+  .nav-item .ic{
+    font-size:11px;
+    flex-shrink:0;
+  }
+  .nav-item .nm{
+    flex:1;
+    font-weight:bold;
+    letter-spacing:0.3px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .nav-item .dot{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--green);
+    flex-shrink:0;
+  }
 
-    .led {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #2a4a5a;
-      transition: 0.3s;
-    }
+  /* Log */
+  #log{
+    background:#02040a;
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:5px 8px;
+    font-size:9px;
+    line-height:1.5;
+    max-height:120px;
+    overflow-y:auto;
+    font-family:var(--mono);
+  }
+  #log::-webkit-scrollbar{width:5px;}
+  #log::-webkit-scrollbar-thumb{background:var(--line);}
+  #log .ln{padding:0.3px 0;display:flex;gap:5px;}
+  #log .ts{color:var(--dim2);flex-shrink:0;font-size:8.5px;}
+  #log .msg{flex:1;word-break:break-word;}
+  #log .msg.ok{color:var(--green);}
+  #log .msg.warn{color:var(--gold);}
+  #log .msg.err{color:var(--red);}
+  #log .msg.info{color:var(--cyan);}
+  #log .msg.vi{color:var(--violet);}
+  #log .msg.nat{color:var(--nat);}
 
-    .led.on {
-      background: #8cf0d0;
-      box-shadow: 0 0 12px #8cf0d0;
-    }
+  /* Actions */
+  .actions{
+    display:flex; gap:3px; flex-wrap:wrap;
+    margin-top:5px;
+  }
+  .actions button{
+    flex:1;
+    min-width:60px;
+    background:var(--bg3);
+    border:1px solid var(--line);
+    color:var(--fg);
+    padding:4px 7px;
+    border-radius:3px;
+    font-family:inherit;
+    font-size:8.5px;
+    letter-spacing:1px;
+    cursor:pointer;
+    transition:.2s;
+    text-transform:uppercase;
+  }
+  .actions button:hover{
+    border-color:var(--nat);
+    color:var(--nat);
+    background:rgba(108,204,255,0.08);
+  }
+  .actions button.pri{
+    border-color:rgba(108,204,255,0.4);
+    color:var(--nat);
+  }
+  .actions button.pri:hover{
+    background:rgba(108,204,255,0.15);
+    color:#fff;
+    box-shadow:0 0 10px rgba(108,204,255,0.35);
+  }
+  .actions button.gold{
+    border-color:rgba(240,208,120,0.4);
+    color:var(--gold);
+  }
+  .actions button.gold:hover{
+    background:rgba(240,208,120,0.1);
+    color:#fff;
+  }
 
-    .led.pulse {
-      background: #f0d080;
-      animation: pulse 1.2s infinite;
-    }
+  /* FL76 */
+  #fl76{
+    position:fixed; bottom:8px; right:8px;
+    padding:4px 9px;
+    background:rgba(4,7,12,0.95);
+    border:1px solid rgba(140,240,208,0.3);
+    border-radius:4px;
+    font-size:9px;
+    letter-spacing:1px;
+    color:var(--green);
+    z-index:12;
+    text-align:right;
+    min-width:95px;
+  }
+  #fl76 .num{font-size:13px;font-weight:bold;}
+  #fl76.outside{border-color:rgba(255,107,138,0.5);color:var(--red);}
+  #fl76.edge{border-color:rgba(240,208,120,0.5);color:var(--gold);}
 
-    .led.off {
-      background: #2a4a5a;
-    }
-
-    .led.sync {
-      background: #b388ff;
-      box-shadow: 0 0 12px #b388ff;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: scale(0.8); }
-      50%      { opacity: 1; transform: scale(1.2); }
-    }
-
-    /* ─── ETAGEN-GRID (Corridor) ────────────────────────────── */
-    .section-title {
-      color: #f0d080;
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: 1.5px;
-      margin: 24px 0 12px;
-      border-bottom: 1px solid #1a2a3a;
-      padding-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .section-title .badge {
-      font-size: 10px;
-      color: #5a7a8a;
-      font-weight: 300;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: #111;
-      border: 1px solid #2a3a4a;
-      border-radius: 12px;
-      padding: 16px 18px;
-      text-decoration: none;
-      color: #e0e0e0;
-      display: block;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .card:hover {
-      border-color: #6cf;
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-    }
-
-    .card .icon {
-      font-size: 28px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .card .name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #d0e0e8;
-    }
-
-    .card .path {
-      font-size: 10px;
-      color: #4a5a6a;
-      margin-top: 4px;
-      word-break: break-all;
-    }
-
-    .card .coord-badge {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      font-size: 10px;
-      color: #b388ff;
-      background: rgba(179, 136, 255, 0.08);
-      padding: 2px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(179, 136, 255, 0.1);
-    }
-
-    .card .status-tag {
-      display: inline-block;
-      font-size: 8px;
-      padding: 1px 10px;
-      border-radius: 12px;
-      margin-top: 6px;
-      background: rgba(0, 0, 0, 0.3);
-    }
-
-    .card .status-tag.legit {
-      border: 1px solid #8cf0d0;
-      color: #8cf0d0;
-    }
-
-    .card .status-tag.pending {
-      border: 1px solid #f0d080;
-      color: #f0d080;
-    }
-
-    /* ─── KOORDINATEN-ANZEIGE ───────────────────────────────── */
-    .coord-box {
-      background: #111;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 12px;
-      line-height: 1.7;
-      color: #8ab0c0;
-      margin: 6px 0 12px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .coord-box .axis-label {
-      color: #f0d080;
-      font-weight: bold;
-    }
-
-    .coord-box .stage-entry {
-      display: flex;
-      justify-content: space-between;
-      padding: 2px 4px;
-      border-bottom: 1px solid #0e1620;
-    }
-
-    .coord-box .stage-entry .id {
-      color: #d0e0e8;
-    }
-
-    .coord-box .stage-entry .pos {
-      color: #b388ff;
-    }
-
-    /* ─── LOG ────────────────────────────────────────────────── */
-    .log-box {
-      background: #111;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 11px;
-      line-height: 1.6;
-      max-height: 160px;
-      overflow-y: auto;
-      color: #5a7a8a;
-      margin-top: 6px;
-    }
-
-    .log-box .entry {
-      border-bottom: 1px solid #0e1620;
-      padding: 2px 0;
-    }
-
-    .log-box .time {
-      color: #2a3a4a;
-    }
-
-    .log-box .floor {
-      color: #6cf;
-    }
-
-    .log-box .msg {
-      color: #8ab0c0;
-    }
-
-    /* ─── SYNC-BAR ───────────────────────────────────────────── */
-    .sync-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      background: #0e141c;
-      padding: 10px 16px;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      margin: 16px 0 6px;
-    }
-
-    .sync-bar .label {
-      font-size: 11px;
-      color: #b388ff;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sync-bar input {
-      flex: 1;
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #d0e0e8;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-family: inherit;
-      min-width: 120px;
-    }
-
-    .sync-bar input::placeholder {
-      color: #4a5a6a;
-    }
-
-    .sync-bar button {
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #9ab0c0;
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .sync-bar button:hover {
-      background: #2a3a4a;
-      border-color: #6cf;
-      color: #d0e8f8;
-    }
-
-    .sync-bar button.sync {
-      border-color: rgba(179, 136, 255, 0.2);
-      color: #b388ff;
-    }
-
-    .sync-bar button.sync:hover {
-      background: rgba(179, 136, 255, 0.1);
-      border-color: #b388ff;
-    }
-
-    /* ─── FOOTER ─────────────────────────────────────────────── */
-    .footer {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: center;
-      margin-top: 24px;
-      padding: 8px 16px;
-      background: #0e141c;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      font-size: 10px;
-      color: #3a4a5a;
-    }
-
-    .footer .gold {
-      color: #f0d080;
-    }
-
-    .footer .stat {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* ─── SCROLLBAR ──────────────────────────────────────────── */
-    ::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #080c12;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #1a2a3a;
-      border-radius: 4px;
-    }
-  </style>
+  @media(max-width:900px){
+    #main{grid-template-columns:1fr; flex-direction:column; overflow-y:auto;}
+    #naturalFrame{height:320px;}
+    #station{overflow:visible;}
+  }
+</style>
 </head>
 <body>
 
-<div class="container">
+<div id="hub">
 
-  <!-- ========================================================= -->
-  <!-- HEADER                                                    -->
-  <!-- ========================================================= -->
-  <div class="header">
-    <h1>🌀 STAGE‑Reich <small>Corridor · Legitimation · Technik</small></h1>
-    <div class="status-leds">
-      <span><span class="led on" id="ledSystem"></span> SYSTEM</span>
-      <span><span class="led sync" id="ledSync"></span> SYNC</span>
-      <span><span class="led pulse" id="ledReich"></span> REICH</span>
+  <!-- ═══ TOP ═══ -->
+  <div id="top">
+    <span class="brand">◈ api.cntrl<small>·natural</small></span>
+    <span class="sep"></span>
+    <span class="stat">CPU <b class="cpu" id="tCpu">mind</b></span>
+    <span class="stat">GPU <b class="gpu" id="tGpu">spu</b></span>
+    <span class="stat">RAM <b class="ram" id="tRam">cache</b></span>
+    <span class="sep"></span>
+    <span class="stat">arg <b class="ok" id="tArg">50%</b></span>
+    <span class="stat">xarg <b class="warn" id="tXarg">30%</b></span>
+    <span class="stat">tmparg <b class="vi" id="tTmp">20%</b></span>
+    <span class="stat">Sync <b class="cy" id="tSync">0</b></span>
+    <span class="spacer"></span>
+    <span class="stat">FL76 <b class="cy" id="tFl">76</b></span>
+    <span id="clock">--:--:--</span>
+  </div>
+
+  <!-- ═══ KERNEL-STRIP ═══ -->
+  <div id="kernels">
+
+    <!-- co.mind (CPU) -->
+    <div class="kern cpu" id="kernCpu" data-kern="cpu">
+      <span class="pulse pulse-anim"></span>
+      <div class="hd"><span>◈ co.mind</span><span class="tag">CPU</span></div>
+      <div class="desc">Logik · Gleichungen · Recall · ROM-Mapping</div>
+      <div class="rows">
+        <div class="row"><span class="k">logik</span><span class="v" id="cpuLogik">—</span></div>
+        <div class="row"><span class="k">recall</span><span class="v" id="cpuRecall">—</span></div>
+        <div class="row"><span class="k">rom</span><span class="v" id="cpuRom">—</span></div>
+        <div class="row"><span class="k">pipeline</span><span class="v" id="cpuPipe">—</span></div>
+      </div>
+      <div class="bar"><div class="f" id="cpuBar" style="width:42%"></div></div>
     </div>
+
+    <!-- co.spu (GPU) -->
+    <div class="kern gpu" id="kernGpu" data-kern="gpu">
+      <span class="pulse pulse-anim"></span>
+      <div class="hd"><span>◈ co.spu</span><span class="tag">GPU</span></div>
+      <div class="desc">Orbit · Fusion-9 · Triangle · Heatmap</div>
+      <div class="rows">
+        <div class="row"><span class="k">orbit</span><span class="v" id="gpuOrbit">—</span></div>
+        <div class="row"><span class="k">fusion</span><span class="v" id="gpuFusion">—</span></div>
+        <div class="row"><span class="k">drift</span><span class="v" id="gpuDrift">—</span></div>
+        <div class="row"><span class="k">frames</span><span class="v" id="gpuFrames">—</span></div>
+      </div>
+      <div class="bar"><div class="f" id="gpuBar" style="width:30%"></div></div>
+    </div>
+
+    <!-- co.cache (RAM) -->
+    <div class="kern ram" id="kernRam" data-kern="ram">
+      <span class="pulse pulse-anim"></span>
+      <div class="hd"><span>◈ co.cache</span><span class="tag">RAM</span></div>
+      <div class="desc">Zwischenspeicher · Pipeline-Cache · ROM-Hybrid</div>
+      <div class="rows">
+        <div class="row"><span class="k">cache</span><span class="v" id="ramCache">—</span></div>
+        <div class="row"><span class="k">hit</span><span class="v" id="ramHit">—</span></div>
+        <div class="row"><span class="k">ready</span><span class="v" id="ramReady">—</span></div>
+        <div class="row"><span class="k">pover</span><span class="v" id="ramPover">—</span></div>
+      </div>
+      <div class="bar"><div class="f" id="ramBar" style="width:65%"></div></div>
+    </div>
+
   </div>
 
-  <!-- ========================================================= -->
-  <!-- ETAGEN-CORRIDOR (alle legitimierten Stages)              -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🏢 ETAGEN · CORRIDOR
-    <span class="badge" id="floorCount">0 Etagen</span>
-  </div>
-  <div class="grid" id="floorGrid"></div>
+  <!-- ═══ MAIN ═══ -->
+  <div id="main">
 
-  <!-- ========================================================= -->
-  <!-- KOORDINATEN-SYSTEM (b/h/t + Stages)                      -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🧭 KOORDINATEN · b/h/t · HDF-Cube
-    <span class="badge" id="coordCount">0 registriert</span>
-  </div>
-  <div class="coord-box" id="coordBox">
-    Koordinaten werden geladen…
-  </div>
+    <!-- NATURAL: eingebettete index.html -->
+    <div id="natural">
+      <div id="naturalHd">
+        <span style="color:var(--nat);font-weight:bold;letter-spacing:2px;">◈ NATURAL</span>
+        <span class="path">/api.cntrl/<b id="natPath">index.html</b></span>
+        <span class="mode">modus <b id="natMode">bereit</b></span>
+      </div>
+      <iframe id="naturalFrame" src="index.html" title="Natural Index"></iframe>
+    </div>
 
-  <!-- ========================================================= -->
-  <!-- SYNC-BAR (arg.sync – Kommunikation mit Etagen)           -->
-  <!-- ========================================================= -->
-  <div class="sync-bar">
-    <span class="label"><span class="led sync" style="display:inline-block;width:8px;height:8px;"></span> arg.sync</span>
-    <input type="text" id="syncInput" placeholder="Nachricht an Etagen…" value="sync:orakel">
-    <button class="sync" id="btnSync">🔄 SYNC</button>
-    <button id="btnBroadcast">📡 BROADCAST</button>
-    <button id="btnResetAll">⟲ RESET</button>
-  </div>
+    <!-- STATION: arg.sync + Navigator + Log -->
+    <div id="station">
 
-  <!-- ========================================================= -->
-  <!-- GETEILTES LOG (etagenübergreifend)                       -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    📜 GETEILTES LOG
-    <span class="badge" id="logCount">0 Einträge</span>
-  </div>
-  <div class="log-box" id="logBox"></div>
+      <!-- arg.sync -->
+      <div class="pane">
+        <h3>arg.sync <span class="badge ok" id="syncBadge">ok</span></h3>
+        <div class="sync-row">
+          <span class="lbl">arg</span>
+          <div class="bar"><div class="f arg" id="fArg" style="width:50%"></div></div>
+          <span class="val arg" id="vArg">50%</span>
+        </div>
+        <div class="sync-row">
+          <span class="lbl">xarg</span>
+          <div class="bar"><div class="f xarg" id="fXarg" style="width:30%"></div></div>
+          <span class="val xarg" id="vXarg">30%</span>
+        </div>
+        <div class="sync-row">
+          <span class="lbl">tmparg</span>
+          <div class="bar"><div class="f tmparg" id="fTmp" style="width:20%"></div></div>
+          <span class="val tmparg" id="vTmp">20%</span>
+        </div>
+        <div class="actions">
+          <button class="pri" id="btnSync">⟳ sync</button>
+          <button class="gold" id="btnAuto">▶ auto</button>
+        </div>
+      </div>
 
-  <!-- ========================================================= -->
-  <!-- FOOTER                                                    -->
-  <!-- ========================================================= -->
-  <div class="footer">
-    <span class="stat"><span class="gold">★</span> STAGE‑Reich · Corridor · Legitimation</span>
-    <span class="stat">🔷 <span id="fActive">0</span> aktive Etagen</span>
-    <span class="stat">⚡ <span id="fSyncCount">0</span> SYNCs</span>
-    <span class="stat">⌨️  s=Sync  b=Broadcast  r=Reset</span>
+      <!-- Navigator -->
+      <div class="pane">
+        <h3>Stationen <span class="badge" id="navBadge">11</span></h3>
+        <div class="nav-grid" id="navGrid"></div>
+      </div>
+
+      <!-- Log -->
+      <div class="pane" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+        <h3>Log <span class="badge" id="logBadge">live</span></h3>
+        <div id="log" style="flex:1;"></div>
+        <div class="actions">
+          <button id="btnReload">⟲ reload</button>
+          <button id="btnReset">↩ reset</button>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
 </div>
 
+<!-- FL76 -->
+<div id="fl76">
+  <div style="font-size:8px;color:var(--dim2);">FL76</div>
+  <div class="num" id="fl76num">76</div>
+</div>
+
 <script>
-  "use strict";
+"use strict";
+// ═══════════════════════════════════════════════════════════════════
+// ◈ api.cntrl · co.mind · co.spu · co.cache · natural
+// Die vorhandene index.html wird natural in die Struktur eingebettet.
+// ═══════════════════════════════════════════════════════════════════
 
-  /* ==============================================================
-     STAGE‑Reich · Corridor · Legitimation
-     Diese index.html ist der zentrale Einstiegspunkt.
-     Sie lädt alle Module, zeigt alle Etagen an,
-     legitimiert stage.html als Corridor und
-     integriert etage-8-orbit-viewer als Technik‑Etage.
-     ============================================================== */
+// ─── STATIONEN (Unterordner von api.cntrl) ────────────────
+const STATIONS = [
+  { id:'cpu',   ic:'◈', name:'cpu',   desc:'co.mind', path:'cpu/index.html' },
+  { id:'gpu',   ic:'◆', name:'gpu',   desc:'co.spu',  path:'gpu/index.html' },
+  { id:'ram',   ic:'▣', name:'ram',   desc:'co.cache', path:'ram/index.html' },
+  { id:'axiom', ic:'⚙', name:'axiom', desc:'axiom.map', path:'axiom.map.js' },
+  { id:'hdf.d', ic:'◆', name:'d.hdf', desc:'rom-d',   path:'d.hdf.rom' },
+  { id:'hdf.e', ic:'◆', name:'e.hdf', desc:'rom-e',   path:'e.hdf.rom' },
+  { id:'hdf.i', ic:'◆', name:'i.hdf', desc:'rom-i',   path:'i.hdf.rom' },
+  { id:'hdf.n', ic:'◆', name:'n.hdf', desc:'rom-n',   path:'n.hdf.rom' },
+  { id:'hdf.o', ic:'◆', name:'o.hdf', desc:'rom-o',   path:'o.hdf.rom' },
+  { id:'hdf.r', ic:'◆', name:'r.hdf', desc:'rom-r',   path:'r.hdf.rom' },
+  { id:'hdf.s', ic:'◆', name:'s.hdf', desc:'rom-s',   path:'s.hdf.rom' },
+  { id:'hdf.u', ic:'◆', name:'u.hdf', desc:'rom-u',   path:'u.hdf.rom' },
+  { id:'hdf.w', ic:'◆', name:'w.hdf', desc:'rom-w',   path:'w.hdf.rom' },
+  { id:'stage', ic:'▤', name:'stage', desc:'stage.html', path:'stage.html' },
+];
 
-  // ─── 1. ETAGEN-REGISTRY (aus aufzug.js) ──────────────────────
-  // Wenn Aufzug.FLOORS nicht existiert, definieren wir sie hier.
-  // So ist die Seite auch ohne externe aufzug.js lauffähig.
-  if (typeof Aufzug === 'undefined') {
-    console.warn('⚠️ aufzug.js nicht gefunden – lege eigene FLOORS an.');
-    window.Aufzug = {
-      FLOORS: [],
-      init: function() {},
-      log: function() {},
-      setSharedValue: function() {},
-      getSharedValue: function() { return undefined; },
-      getSharedLog: function() { return []; }
-    };
-  }
+// ─── STATE ────────────────────────────────────────────────
+const S = {
+  tick: 0,
+  syncCount: 0,
+  // arg.sync
+  arg: 0.5, xarg: 0.3, tmparg: 0.2,
+  // Kerns
+  cpu: { logik:0.42, recall:0.55, rom:0.88, pipe:0.34, pulse:true },
+  gpu: { orbit:0.30, fusion:0.42, drift:0.18, frames:0, pulse:true },
+  ram: { cache:0.65, hit:0.72, ready:1,   pover:0.94, pulse:true },
+  // auto
+  auto: false,
+  autoTimer: null,
+  // FL76
+  flRaw: 76, flSmooth: 76, lastFrameT: 0,
+};
 
-  // Falls die FLOORS noch leer sind, füllen wir sie mit den
-  // wichtigsten Etagen – inklusive stage.html und orbit-viewer.
-  if (Aufzug.FLOORS.length === 0) {
-    Aufzug.FLOORS = [
-      { id: 'stage', name: '🎛️ Stage · Corridor', path: 'stage.html', icon: '🎛️', isRoot: false },
-      { id: 'ui', name: '🖥️ UI · Interface', path: 'ui.html', icon: '🖥️', isRoot: false },
-      { id: 'etage-8-orbit-viewer', name: '🌀 Orbit-Viewer · Etage 8', path: 'etage-8-orbit-viewer/index.html', icon: '🌀', isRoot: false },
-      { id: 'root', name: '🛗 ROOT', path: 'index.html', icon: '🛗', isRoot: true }
-    ];
-  }
+// ─── LOG ─────────────────────────────────────────────────
+const logEl = document.getElementById('log');
+function log(msg, cls = '') {
+  const t = new Date().toLocaleTimeString('de-DE');
+  const div = document.createElement('div');
+  div.className = 'ln';
+  div.innerHTML = `<span class="ts">[${t}]</span><span class="msg ${cls}">${msg}</span>`;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+  while (logEl.children.length > 60) logEl.removeChild(logEl.firstChild);
+}
 
-  // ─── 2. KOORDINATEN-REGISTRIERUNG ─────────────────────────────
-  // Wenn COORD nicht existiert, bauen wir eine minimale Version.
-  if (typeof COORD === 'undefined') {
-    console.warn('⚠️ coord.js nicht gefunden – lege eigene COORD an.');
-    window.COORD = {
-      axes: {
-        b: 'Breite (X‑Achse)',
-        h: 'Höhe (Y‑Achse)',
-        t: 'Tiefe (Z‑Achse)'
-      },
-      stages: {},
-      register: function(id, x, y, z) {
-        this.stages[id] = { x, y, z };
-      },
-      get: function(id) {
-        return this.stages[id] || null;
+function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+function fmt(x,d=2){ return x.toFixed(d); }
+function rnd(a,b){ return a + Math.random()*(b-a); }
+
+// ═════════════════════════════════════════════════════════
+// KERNEL RENDER
+// ═════════════════════════════════════════════════════════
+function renderKernels() {
+  // CPU
+  document.getElementById('cpuLogik').textContent = fmt(S.cpu.logik);
+  document.getElementById('cpuRecall').textContent = fmt(S.cpu.recall);
+  document.getElementById('cpuRom').textContent = fmt(S.cpu.rom);
+  document.getElementById('cpuPipe').textContent = fmt(S.cpu.pipe);
+  document.getElementById('cpuBar').style.width = (S.cpu.logik*100) + '%';
+
+  // GPU
+  document.getElementById('gpuOrbit').textContent = fmt(S.gpu.orbit);
+  document.getElementById('gpuFusion').textContent = fmt(S.gpu.fusion);
+  document.getElementById('gpuDrift').textContent = fmt(S.gpu.drift);
+  document.getElementById('gpuFrames').textContent = S.gpu.frames;
+  document.getElementById('gpuBar').style.width = (S.gpu.fusion*100) + '%';
+
+  // RAM
+  document.getElementById('ramCache').textContent = fmt(S.ram.cache);
+  document.getElementById('ramHit').textContent = fmt(S.ram.hit);
+  document.getElementById('ramReady').textContent = S.ram.ready ? '●' : '○';
+  document.getElementById('ramPover').textContent = fmt(S.ram.pover);
+  document.getElementById('ramBar').style.width = (S.ram.cache*100) + '%';
+}
+
+// ═════════════════════════════════════════════════════════
+// ARG.SYNC
+// ═════════════════════════════════════════════════════════
+function argSync() {
+  // Input aus Kernen
+  const cpuIn = (S.cpu.logik + S.cpu.recall + S.cpu.rom + S.cpu.pipe) / 4;
+  const gpuIn = (S.gpu.orbit + S.gpu.fusion) / 2;
+  const ramIn = (S.ram.cache + S.ram.hit) / 2;
+
+  S.arg    = clamp01(cpuIn * 0.5 + ramIn * 0.3 + gpuIn * 0.2 + (Math.random()-0.5)*0.06);
+  S.xarg   = clamp01(gpuIn * 0.5 + cpuIn * 0.3 + ramIn * 0.2 + (Math.random()-0.5)*0.06);
+  S.tmparg = clamp01(ramIn * 0.5 + gpuIn * 0.3 + cpuIn * 0.2 + (Math.random()-0.5)*0.06);
+
+  const sum = S.arg + S.xarg + S.tmparg || 1;
+  S.arg/=sum; S.xarg/=sum; S.tmparg/=sum;
+
+  // Rückwirkung auf Kerns
+  S.cpu.logik = clamp01(S.cpu.logik * 0.9 + S.arg * 0.1);
+  S.cpu.pipe  = clamp01(S.cpu.pipe  * 0.9 + S.xarg * 0.1);
+  S.gpu.fusion = clamp01(S.gpu.fusion * 0.9 + S.arg * 0.05 + S.xarg * 0.05);
+  S.gpu.orbit  = clamp01(S.gpu.orbit * 0.9 + S.tmparg * 0.1);
+  S.ram.cache = clamp01(S.ram.cache * 0.9 + S.arg * 0.1);
+  S.ram.pover = clamp01(S.ram.pover * 0.95 + 0.05);
+
+  S.syncCount++;
+  S.gpu.frames++;
+
+  // UI
+  document.getElementById('fArg').style.width = (S.arg*100)+'%';
+  document.getElementById('vArg').textContent = Math.round(S.arg*100)+'%';
+  document.getElementById('fXarg').style.width = (S.xarg*100)+'%';
+  document.getElementById('vXarg').textContent = Math.round(S.xarg*100)+'%';
+  document.getElementById('fTmp').style.width = (S.tmparg*100)+'%';
+  document.getElementById('vTmp').textContent = Math.round(S.tmparg*100)+'%';
+
+  document.getElementById('tArg').textContent = Math.round(S.arg*100)+'%';
+  document.getElementById('tXarg').textContent = Math.round(S.xarg*100)+'%';
+  document.getElementById('tTmp').textContent = Math.round(S.tmparg*100)+'%';
+  document.getElementById('tSync').textContent = S.syncCount;
+
+  renderKernels();
+  log(`⟳ arg.sync · arg=${(S.arg*100).toFixed(1)}% · xarg=${(S.xarg*100).toFixed(1)}% · tmparg=${(S.tmparg*100).toFixed(1)}%`, 'info');
+
+  // Nach Root (parent)
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type:'arg.sync', from:'api.cntrl', payload:{arg:S.arg, xarg:S.xarg, tmparg:S.tmparg} }, '*');
+    }
+  } catch(_) {}
+
+  // Nach Kind (iframe)
+  sendToChild({ type:'arg.sync', from:'api.cntrl', payload:{arg:S.arg, xarg:S.xarg, tmparg:S.tmparg} });
+}
+
+// ═════════════════════════════════════════════════════════
+// NATURAL IFRAME
+// ═════════════════════════════════════════════════════════
+function sendToChild(msg) {
+  const frame = document.getElementById('naturalFrame');
+  try {
+    if (frame && frame.contentWindow) frame.contentWindow.postMessage(msg, '*');
+  } catch(_) {}
+}
+
+function loadNatural(path) {
+  const frame = document.getElementById('naturalFrame');
+  document.getElementById('natPath').textContent = path;
+  document.getElementById('natMode').textContent = 'lädt';
+  frame.src = path;
+  log(`◈ natural → ${path}`, 'nat');
+
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.path === path);
+  });
+}
+
+// ═════════════════════════════════════════════════════════
+// NAVIGATOR RENDER
+// ═════════════════════════════════════════════════════════
+function renderNav() {
+  const el = document.getElementById('navGrid');
+  el.innerHTML = STATIONS.map(s => `
+    <div class="nav-item" data-id="${s.id}" data-path="${s.path}">
+      <span class="ic">${s.ic}</span>
+      <span class="nm">${s.name}</span>
+      <span class="dot"></span>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('.nav-item').forEach(n => {
+    n.addEventListener('click', () => {
+      loadNatural(n.dataset.path);
+    });
+  });
+
+  document.getElementById('navBadge').textContent = STATIONS.length;
+}
+
+// ═════════════════════════════════════════════════════════
+// KERNEL KLICK → natural laden
+// ═════════════════════════════════════════════════════════
+function bindKernels() {
+  document.querySelectorAll('.kern').forEach(k => {
+    k.addEventListener('click', () => {
+      const kern = k.dataset.kern;
+      if (kern === 'cpu') {
+        loadNatural('cpu/index.html');
+        log('◈ co.mind → cpu/index.html geladen', 'ok');
+      } else if (kern === 'gpu') {
+        loadNatural('gpu/index.html');
+        log('◆ co.spu → gpu/index.html geladen', 'ok');
+      } else if (kern === 'ram') {
+        loadNatural('ram/index.html');
+        log('▣ co.cache → ram/index.html geladen', 'ok');
       }
-    };
-  }
+      k.style.transform = 'scale(0.98)';
+      setTimeout(() => k.style.transform = '', 120);
+    });
+  });
+}
 
-  // Alle Etagen aus Aufzug.FLOORS in COORD registrieren (falls noch nicht geschehen)
-  Aufzug.FLOORS.forEach(f => {
-    if (!f.isRoot && !COORD.stages[f.id]) {
-      // Standard-Koordinaten vergeben: x = Index, y = 0, z = 0
-      const idx = Aufzug.FLOORS.indexOf(f);
-      COORD.register(f.id, idx + 1, 0, 0);
-    }
+// ═════════════════════════════════════════════════════════
+// AUTO
+// ═════════════════════════════════════════════════════════
+function startAuto() {
+  if (S.autoTimer) return;
+  S.auto = true;
+  S.autoTimer = setInterval(() => {
+    // Kleine Dynamik in den Kernen
+    S.cpu.logik = clamp01(S.cpu.logik + (Math.random()-0.5)*0.1);
+    S.cpu.recall = clamp01(S.cpu.recall + (Math.random()-0.5)*0.08);
+    S.cpu.rom = clamp01(S.cpu.rom + (Math.random()-0.5)*0.04);
+    S.cpu.pipe = clamp01(S.cpu.pipe + (Math.random()-0.5)*0.1);
+
+    S.gpu.orbit = clamp01(S.gpu.orbit + (Math.random()-0.5)*0.12);
+    S.gpu.fusion = clamp01(S.gpu.fusion + (Math.random()-0.5)*0.08);
+    S.gpu.drift = clamp01(S.gpu.drift + (Math.random()-0.5)*0.15);
+    S.gpu.frames++;
+
+    S.ram.cache = clamp01(S.ram.cache + (Math.random()-0.5)*0.06);
+    S.ram.hit = clamp01(S.ram.hit + (Math.random()-0.5)*0.05);
+    S.ram.pover = clamp01(S.ram.pover + (Math.random()-0.5)*0.03);
+
+    argSync();
+  }, 1400);
+  document.getElementById('btnAuto').textContent = '⏸ stop';
+  log('▶ AUTO gestartet', 'ok');
+}
+
+function stopAuto() {
+  S.auto = false;
+  if (S.autoTimer) { clearInterval(S.autoTimer); S.autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶ auto';
+  log('⏸ AUTO gestoppt', 'warn');
+}
+
+// ═════════════════════════════════════════════════════════
+// FL76
+// ═════════════════════════════════════════════════════════
+function tickFl(now) {
+  if (S.lastFrameT > 0) {
+    S.flRaw = now - S.lastFrameT;
+    S.flSmooth = S.flSmooth * 0.88 + S.flRaw * 0.12;
+  }
+  S.lastFrameT = now;
+  const fl = Math.round(S.flSmooth);
+  document.getElementById('fl76num').textContent = fl;
+  document.getElementById('tFl').textContent = fl;
+  const mon = document.getElementById('fl76');
+  if (fl >= 60 && fl <= 90) mon.className = '';
+  else if (fl < 40 || fl > 120) mon.className = 'outside';
+  else mon.className = 'edge';
+  requestAnimationFrame(tickFl);
+}
+
+// ═════════════════════════════════════════════════════════
+// CLOCK
+// ═════════════════════════════════════════════════════════
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('de-DE');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═════════════════════════════════════════════════════════
+// MESSAGES VON ROOT
+// ═════════════════════════════════════════════════════════
+window.addEventListener('message', (ev) => {
+  const d = ev.data;
+  if (!d || !d.type) return;
+  if (d.type === 'arg.sync') {
+    S.syncCount++;
+    log(`⬇ SYNC ← Root · ${d.payload || ''}`, 'vi');
+    sendToChild(d);
+  }
+  if (d.type === 'natural.load' && d.path) {
+    loadNatural(d.path);
+  }
+  if (d.type === 'reset') {
+    log('↩ reset von Root', 'warn');
+    S.syncCount = 0;
+    S.arg = 0.5; S.xarg = 0.3; S.tmparg = 0.2;
+    renderKernels();
+  }
+});
+
+// ═════════════════════════════════════════════════════════
+// BUTTONS
+// ═════════════════════════════════════════════════════════
+document.getElementById('btnSync').addEventListener('click', argSync);
+document.getElementById('btnAuto').addEventListener('click', () => S.auto ? stopAuto() : startAuto());
+document.getElementById('btnReload').addEventListener('click', () => {
+  const frame = document.getElementById('naturalFrame');
+  const cur = frame.src;
+  frame.src = cur;
+  log('⟲ natural neu geladen', 'nat');
+});
+document.getElementById('btnReset').addEventListener('click', () => {
+  S.syncCount = 0;
+  S.arg = 0.5; S.xarg = 0.3; S.tmparg = 0.2;
+  S.cpu = { logik:0.42, recall:0.55, rom:0.88, pipe:0.34 };
+  S.gpu = { orbit:0.30, fusion:0.42, drift:0.18, frames:0 };
+  S.ram = { cache:0.65, hit:0.72, ready:1,   pover:0.94 };
+  renderKernels();
+  log('↩ reset · kerne zurückgesetzt', 'warn');
+  sendToChild({ type:'reset', from:'api.cntrl' });
+});
+
+// ═════════════════════════════════════════════════════════
+// KEYBOARD
+// ═════════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'IFRAME') return;
+  if (e.key === 'y' || e.key === 'Y') argSync();
+  if (e.key === 'a' || e.key === 'A') S.auto ? stopAuto() : startAuto();
+  if (e.key === 'r' || e.key === 'R') document.getElementById('btnReload').click();
+  if (e.key === '1') loadNatural('cpu/index.html');
+  if (e.key === '2') loadNatural('gpu/index.html');
+  if (e.key === '3') loadNatural('ram/index.html');
+  if (e.key === '0') loadNatural('index.html');
+});
+
+// ═════════════════════════════════════════════════════════
+// INIT
+// ═════════════════════════════════════════════════════════
+function init() {
+  renderKernels();
+  renderNav();
+  bindKernels();
+  argSync();
+
+  // iframe load-Event
+  const frame = document.getElementById('naturalFrame');
+  frame.addEventListener('load', () => {
+    document.getElementById('natMode').textContent = 'geladen';
+    document.getElementById('natMode').style.color = 'var(--green)';
   });
 
-  // Spezielle Koordinaten für wichtige Etagen
-  COORD.register('stage', 1, 0, 0);
-  COORD.register('ui', 2, 0, 0);
-  COORD.register('etage-8-orbit-viewer', 3, 8, 1);
+  log('◈ api.cntrl · natural geladen', 'nat');
+  log('→ co.mind (CPU) · co.spu (GPU) · co.cache (RAM) bereit', 'ok');
+  log('→ natural index.html eingebettet', 'nat');
+  log('→ Klicks auf Kernel wechseln natural-source', 'info');
+  log('→ Tasten: Y=sync · A=auto · R=reload · 1=cpu · 2=gpu · 3=ram · 0=natural', 'info');
 
-  // Achsen registrieren (falls nicht schon in coord.js)
-  if (!COORD.stages.b) COORD.register('b', 1, 0, 0);
-  if (!COORD.stages.h) COORD.register('h', 0, 1, 0);
-  if (!COORD.stages.t) COORD.register('t', 0, 0, 1);
-
-  // ─── 3. DOM-REFERENZEN ────────────────────────────────────────
-  const floorGrid = document.getElementById('floorGrid');
-  const coordBox = document.getElementById('coordBox');
-  const logBox = document.getElementById('logBox');
-  const syncInput = document.getElementById('syncInput');
-
-  // ─── 4. ETAGEN ANZEIGEN ──────────────────────────────────────
-  function renderFloors() {
-    floorGrid.innerHTML = '';
-    let count = 0;
-
-    Aufzug.FLOORS.forEach(f => {
-      if (f.isRoot) return;
-      count++;
-
-      const coord = COORD.get(f.id) || { x: '?', y: '?', z: '?' };
-      const isLegit = !!COORD.get(f.id);
-
-      const card = document.createElement('a');
-      card.className = 'card';
-      card.href = f.path;
-      card.innerHTML = `
-        <span class="icon">${f.icon || '📁'}</span>
-        <span class="name">${f.name}</span>
-        <span class="coord-badge">(${coord.x}, ${coord.y}, ${coord.z})</span>
-        <div class="path">${f.path}</div>
-        <span class="status-tag ${isLegit ? 'legit' : 'pending'}">${isLegit ? '✅ legitimiert' : '⏳ pending'}</span>
-      `;
-      floorGrid.appendChild(card);
-    });
-
-    document.getElementById('floorCount').textContent = `${count} Etagen`;
-    document.getElementById('fActive').textContent = count;
-  }
-
-  // ─── 5. KOORDINATEN ANZEIGEN ──────────────────────────────────
-  function renderCoords() {
-    const out = [];
-
-    // Achsen
-    out.push('<span class="axis-label">📐 Achsen:</span>');
-    Object.entries(COORD.axes || {}).forEach(([k, v]) => {
-      out.push(`&nbsp;&nbsp;• ${k}: ${v}`);
-    });
-
-    // Stages
-    out.push('<br><span class="axis-label">🏢 Stages:</span>');
-    const entries = Object.entries(COORD.stages || {});
-    if (entries.length === 0) {
-      out.push('&nbsp;&nbsp;– keine registriert –');
-    } else {
-      entries.forEach(([id, c]) => {
-        out.push(`<div class="stage-entry"><span class="id">${id}</span><span class="pos">(${c.x}, ${c.y}, ${c.z})</span></div>`);
-      });
+  // Root mitteilen
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type:'api.cntrl.ready', from:'api.cntrl' }, '*');
     }
+  } catch(_) {}
 
-    coordBox.innerHTML = out.join('');
-    document.getElementById('coordCount').textContent = `${entries.length} registriert`;
-  }
+  requestAnimationFrame(tickFl);
+}
 
-  // ─── 6. LOG ANZEIGEN ──────────────────────────────────────────
-  function renderLog() {
-    const entries = (Aufzug.getSharedLog && Aufzug.getSharedLog()) || [];
-    logBox.innerHTML = '';
-    entries.slice().reverse().forEach(e => {
-      const entry = document.createElement('div');
-      entry.className = 'entry';
-      entry.innerHTML = `
-        <span class="time">[${e.time || '--:--:--'}]</span>
-        <span class="floor">${e.floor || 'system'}</span>
-        <span class="msg">${e.msg || ''}</span>
-      `;
-      logBox.appendChild(entry);
-    });
-    document.getElementById('logCount').textContent = `${entries.length} Einträge`;
-  }
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
-  // ─── 7. SYNC-FUNKTIONEN ──────────────────────────────────────
-  let syncCount = 0;
-
-  function doSync(message) {
-    const msg = message || syncInput.value.trim() || 'sync:orakel';
-    syncCount++;
-
-    // LED kurz aufleuchten lassen
-    const led = document.getElementById('ledSync');
-    led.className = 'led sync';
-    setTimeout(() => { led.className = 'led'; }, 400);
-
-    // In Aufzug-Log schreiben
-    if (Aufzug.log) {
-      Aufzug.log(`SYNC: ${msg}`);
-    }
-
-    // An alle Etagen per postMessage senden (wenn iframes existieren)
-    document.querySelectorAll('iframe').forEach(iframe => {
-      try {
-        iframe.contentWindow.postMessage({ type: 'arg.sync', payload: msg, from: 'orakel' }, '*');
-      } catch (_) {}
-    });
-
-    // Lokales Log
-    const logEntry = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: `⬆ SYNC: ${msg}`
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(logEntry);
-    }
-
-    document.getElementById('fSyncCount').textContent = syncCount;
-    renderLog();
-  }
-
-  function broadcastSync() {
-    doSync(syncInput.value.trim() || 'broadcast:orakel');
-  }
-
-  function resetAll() {
-    syncCount = 0;
-    document.getElementById('fSyncCount').textContent = '0';
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().length = 0;
-    }
-    renderLog();
-    const led = document.getElementById('ledSystem');
-    led.className = 'led';
-    setTimeout(() => { led.className = 'led on'; }, 300);
-  }
-
-  // ─── 8. EVENT-BINDING ─────────────────────────────────────────
-  document.getElementById('btnSync').addEventListener('click', () => doSync());
-  document.getElementById('btnBroadcast').addEventListener('click', broadcastSync);
-  document.getElementById('btnResetAll').addEventListener('click', resetAll);
-
-  syncInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSync();
-  });
-
-  // ─── 9. TASTATUR ──────────────────────────────────────────────
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 's' || e.key === 'S') { e.preventDefault(); doSync(); }
-    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); broadcastSync(); }
-    if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetAll(); }
-  });
-
-  // ─── 10. POSTMESSAGE-EMPFAENGER (von Etagen) ──────────────────
-  window.addEventListener('message', (event) => {
-    const data = event.data;
-    if (data && data.type === 'arg.sync') {
-      const from = data.from || 'unbekannt';
-      const payload = data.payload || '';
-      syncInput.value = payload;
-      document.getElementById('fSyncCount').textContent = ++syncCount;
-      // In Aufzug-Log schreiben
-      if (Aufzug.log) {
-        Aufzug.log(`📨 Empfangen von ${from}: ${payload}`);
-      }
-      renderLog();
-    }
-    if (data && data.type === 'etage.ready') {
-      const from = data.from || 'unbekannt';
-      // Etage in COORD nachtragen, falls nicht vorhanden
-      if (!COORD.get(from)) {
-        const idx = Aufzug.FLOORS.findIndex(f => f.id === from);
-        COORD.register(from, idx + 1, 0, 0);
-        renderCoords();
-        renderFloors();
-      }
-    }
-  });
-
-  // ─── 11. INIT ──────────────────────────────────────────────────
-  function init() {
-    // Aufzug initialisieren (falls vorhanden)
-    if (Aufzug.init) {
-      Aufzug.init({ currentId: 'root', basePath: '' });
-    }
-
-    renderFloors();
-    renderCoords();
-    renderLog();
-
-    document.getElementById('fSyncCount').textContent = '0';
-    document.getElementById('ledSystem').className = 'led on';
-    document.getElementById('ledReich').className = 'led pulse';
-
-    // Begrüßung
-    const welcome = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: '🌀 STAGE‑Reich · Corridor · Legitimation · bereit'
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(welcome);
-    }
-    renderLog();
-
-    console.log('🌀 STAGE‑Reich initialisiert');
-    console.log('📐 Achsen:', Object.keys(COORD.axes || {}));
-    console.log('🏢 Stages:', Object.keys(COORD.stages || {}));
-    console.log('⌨️  s=Sync  b=Broadcast  r=Reset');
-  }
-
-  // Warten, bis alle Skripte geladen sind
-  if (document.readyState === 'complete') {
-    init();
-  } else {
-    window.addEventListener('load', init);
-  }
+// ═════════════════════════════════════════════════════════
+// PUBLIC API
+// ═════════════════════════════════════════════════════════
+window.API_CNTRL = {
+  sync: () => argSync(),
+  auto: () => startAuto(),
+  stop: () => stopAuto(),
+  load: (p) => loadNatural(p),
+  state: () => ({ ...S }),
+  kernels: () => ({
+    cpu: { ...S.cpu },
+    gpu: { ...S.gpu },
+    ram: { ...S.ram },
+  }),
+  stations: () => STATIONS.map(s => ({ ...s })),
+};
+window.CO = window.API_CNTRL;
+console.log('%c◈ api.cntrl · natural geladen', 'color:#6cf;font-weight:bold;font-size:14px;');
+console.log('→ window.CO.sync() · .load("cpu/index.html") · .state() · .kernels()');
 </script>
-
 </body>
 </html>
