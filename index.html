@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>◈ ORAKEL · MOVE · PULS · MATHEMATIK · iki1uc</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --bg:#03040a; --bg2:#0a0c18; --bg3:#101428;
+    --fg:#c8d8e8; --dim:#5a7288; --dim2:#2a3644;
+    --cyan:#5fc8ff; --gold:#ffcc44; --gold2:#ffe9b0;
+    --violet:#b388ff; --green:#8cf0d0; --pink:#ff88b0;
+    --red:#ff5a7a; --orange:#ffa040;
+    --orakel:#d8b4ff; --puls:#ff66c8;
+    --line:rgba(140,160,220,0.08);
+    --line2:rgba(140,160,220,0.04);
+    --mono:'Consolas','Courier New',monospace;
+    --serif:'Yu Mincho','Hiragino Mincho ProN',serif;
+  }
+  html,body{height:100%;overflow:hidden;}
+  body{
+    background:#000;
+    color:var(--fg);
+    font-family:var(--mono);
+    font-size:12px;
+  }
+
+  /* ═══ DESKTOP ═══ */
+  #pe{
+    width:100vw; height:100vh;
+    background:var(--bg);
+    display:flex; flex-direction:column;
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* ── TOP BAR ─────────────────────────────── */
+  #topbar{
+    height:28px;
+    background:linear-gradient(180deg,#0a0e1e,#04060c);
+    border-bottom:1px solid var(--line);
+    display:flex; align-items:center;
+    padding:0 12px;
+    font-size:11px; letter-spacing:1px;
+    gap:12px;
+    flex-shrink:0;
+  }
+  #topbar .logo{
+    color:var(--gold);
+    font-weight:bold;
+    letter-spacing:3px;
+    font-family:var(--serif);
+  }
+  #topbar .logo b{color:var(--violet);}
+  #topbar .sep{width:1px;height:14px;background:var(--line);}
+  #topbar .stat{
+    color:var(--dim);
+    font-size:10px;
+    display:flex; gap:14px;
+    margin-left:auto;
+    align-items:center;
+  }
+  #topbar .stat b{color:var(--green);font-weight:bold;}
+  #topbar .stat b.warn{color:var(--gold);}
+  #topbar .stat b.vio{color:var(--violet);}
+  #topbar .stat b.pk{color:var(--puls);}
+  #topbar #clock{color:var(--cyan);}
+
+  /* ── MAIN: 3 SPALTEN ─────────────────────── */
+  #main{
+    flex:1;
+    display:grid;
+    grid-template-columns: 220px 1fr 280px;
+    overflow:hidden;
+    min-height:0;
+  }
+
+  /* ── LEFT: ROOT-TREE ─────────────────────── */
+  #tree{
+    background:var(--bg2);
+    border-right:1px solid var(--line);
+    overflow-y:auto;
+    padding:6px 0;
+    font-size:11px;
+  }
+  #tree::-webkit-scrollbar{width:6px;}
+  #tree::-webkit-scrollbar-thumb{background:var(--line);}
+  .tree-hdr{
+    padding:6px 12px 4px;
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    font-family:var(--serif);
+  }
+  .tree-item{
+    padding:4px 12px 4px 22px;
+    color:var(--fg);
+    cursor:pointer;
+    display:flex; justify-content:space-between;
+    align-items:center;
+    font-size:11px;
+    border-left:2px solid transparent;
+    transition:.15s;
+    position:relative;
+  }
+  .tree-item::before{
+    content:'▸';
+    position:absolute; left:8px;
+    color:var(--dim2);
+    font-size:9px;
+  }
+  .tree-item:hover{
+    background:rgba(179,136,255,0.06);
+    border-left-color:var(--violet);
+  }
+  .tree-item.active{
+    background:rgba(179,136,255,0.1);
+    border-left-color:var(--violet);
+    color:var(--violet);
+  }
+  .tree-item .ind{color:var(--dim2);font-size:9px;}
+  .tree-item.on .ind{color:var(--green);}
+  .tree-item.pulse .ind{
+    color:var(--puls);
+    animation:treePulse 1.2s infinite;
+  }
+  @keyframes treePulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+
+  /* ── CENTER: WORKSPACE ───────────────────── */
+  #work{
+    display:flex; flex-direction:column;
+    overflow:hidden;
+    background:var(--bg);
+    min-height:0;
+  }
+  #workHdr{
+    height:26px;
+    background:var(--bg2);
+    border-bottom:1px solid var(--line);
+    display:flex; align-items:center;
+    padding:0 14px;
+    font-size:10px; letter-spacing:1.5px;
+    color:var(--gold);
+    text-transform:uppercase;
+    gap:12px;
+    flex-shrink:0;
+    font-family:var(--serif);
+  }
+  #workHdr .path{
+    color:var(--dim);
+    font-size:10px;
+    letter-spacing:0;
+    font-family:var(--mono);
+  }
+  #workHdr .path b{color:var(--violet);}
+  #workBody{
+    flex:1;
+    padding:10px;
+    overflow-y:auto;
+    display:grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap:8px;
+    align-content:start;
+  }
+  #workBody::-webkit-scrollbar{width:8px;}
+  #workBody::-webkit-scrollbar-thumb{background:var(--line);}
+
+  .panel{
+    background:var(--bg2);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:10px 12px;
+    min-width:0;
+    position:relative;
+  }
+  .panel.pulse-border{
+    animation:borderPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes borderPulse{
+    0%,100%{border-color:var(--line);}
+    50%{border-color:rgba(179,136,255,0.3);box-shadow:0 0 12px rgba(179,136,255,0.08) inset;}
+  }
+  .panel h3{
+    font-size:10px; letter-spacing:1.8px;
+    color:var(--violet);
+    text-transform:uppercase;
+    margin-bottom:8px;
+    padding-bottom:5px;
+    border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between;
+    align-items:center;
+    font-family:var(--serif);
+    font-weight:normal;
+  }
+  .panel h3 .badge{
+    font-size:9px;
+    color:var(--dim);
+    background:var(--bg3);
+    padding:1px 6px;
+    border-radius:3px;
+    letter-spacing:0.5px;
+    font-family:var(--mono);
+  }
+  .panel h3 .badge.ok{color:var(--green);}
+  .panel h3 .badge.warn{color:var(--gold);}
+  .panel h3 .badge.puls{color:var(--puls);}
+  .panel h3 .badge.vio{color:var(--violet);}
+
+  /* ── PULS-KERN ───────────────────────────── */
+  #pulsWrap{
+    grid-column:1 / -1;
+    display:grid;
+    grid-template-columns:280px 1fr;
+    gap:12px;
+    align-items:center;
+  }
+  @media(max-width:1000px){
+    #pulsWrap{grid-template-columns:1fr;}
+  }
+  #pulsOrbWrap{
+    position:relative;
+    width:280px;
+    height:280px;
+    margin:0 auto;
+  }
+  #pulsOrbWrap svg{position:absolute;inset:0;overflow:visible;}
+  #pulsCore{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:110px; height:110px;
+    border-radius:50%;
+    background:radial-gradient(circle at 40% 35%,
+      #ffffff 0%, #ffe9b0 15%, #ffcc44 35%,
+      #b388ff 65%, #2a1050 100%);
+    box-shadow:
+      0 0 40px rgba(255,204,68,0.7),
+      0 0 90px rgba(179,136,255,0.5),
+      inset 0 0 30px rgba(255,255,255,0.3);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif);
+    font-size:38px;
+    color:#1a0838;
+    font-weight:bold;
+    text-shadow:0 0 14px rgba(255,255,255,0.6);
+    transition:transform .15s;
+    z-index:3;
+  }
+  #pulsCore.tick{
+    animation:coreTick .3s;
+  }
+  @keyframes coreTick{
+    0%{transform:translate(-50%,-50%) scale(1);}
+    50%{transform:translate(-50%,-50%) scale(1.12);}
+    100%{transform:translate(-50%,-50%) scale(1);}
+  }
+
+  #pulsNum{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    font-size:44px;
+    font-weight:bold;
+    color:#fff;
+    text-shadow:0 0 16px rgba(255,255,255,0.9),
+                0 0 32px rgba(255,204,68,0.8);
+    z-index:4;
+    font-family:var(--mono);
+    letter-spacing:-1px;
+  }
+
+  .puls-info{
+    display:flex; flex-direction:column;
+    gap:6px;
+  }
+  .puls-info .hero{
+    font-family:var(--serif);
+    font-size:22px;
+    letter-spacing:6px;
+    color:var(--gold);
+    text-align:center;
+    text-shadow:0 0 20px rgba(255,204,68,0.5);
+  }
+  .puls-info .sub{
+    font-size:10px;
+    color:var(--dim);
+    text-align:center;
+    letter-spacing:2px;
+    margin-bottom:6px;
+  }
+  .puls-info .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:5px;
+  }
+  .puls-info .cell{
+    background:var(--bg3);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:6px 9px;
+    display:flex; justify-content:space-between;
+    align-items:center;
+    font-size:10px;
+  }
+  .puls-info .cell .k{color:var(--dim);font-size:9.5px;letter-spacing:1px;}
+  .puls-info .cell .v{font-weight:bold;color:var(--fg);font-size:12px;}
+  .puls-info .cell.v1 .v{color:var(--gold);}
+  .puls-info .cell.v2 .v{color:var(--violet);}
+  .puls-info .cell.v3 .v{color:var(--green);}
+  .puls-info .cell.v4 .v{color:var(--cyan);}
+  .puls-info .cell.v5 .v{color:var(--puls);}
+
+  /* ── MATH-LIVE ───────────────────────────── */
+  .math-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:5px;
+  }
+  .math-row{
+    display:grid;
+    grid-template-columns:110px 1fr 70px;
+    gap:8px;
+    align-items:center;
+    padding:5px 0;
+    border-bottom:1px dashed var(--line2);
+    font-size:10.5px;
+  }
+  .math-row:last-child{border-bottom:none;}
+  .math-row .lbl{
+    color:var(--dim);
+    font-size:10px;
+    letter-spacing:1px;
+    font-weight:bold;
+  }
+  .math-row .eq{
+    color:var(--orakel);
+    font-size:10.5px;
+    letter-spacing:0.5px;
+    word-break:break-all;
+  }
+  .math-row .eq .n{color:var(--cyan);font-weight:bold;}
+  .math-row .eq .sym{color:var(--puls);}
+  .math-row .res{
+    text-align:right;
+    color:var(--gold);
+    font-weight:bold;
+    font-size:11px;
+  }
+
+  /* ── ORAKEL SETS ─────────────────────────── */
+  .set-row{
+    display:grid;
+    grid-template-columns:20px 1fr 65px 55px;
+    gap:6px;
+    align-items:center;
+    padding:4px 0;
+    border-bottom:1px dashed var(--line2);
+    font-size:10px;
+  }
+  .set-row:last-child{border-bottom:none;}
+  .set-row .ic{
+    color:var(--puls);
+    font-size:12px;
+    text-align:center;
+  }
+  .set-row .name{
+    color:var(--fg);
+    font-weight:bold;
+    letter-spacing:0.5px;
+  }
+  .set-row .name small{
+    color:var(--dim);
+    font-size:8.5px;
+    font-weight:normal;
+    margin-left:4px;
+  }
+  .set-row .cnt{
+    color:var(--violet);
+    text-align:right;
+    font-weight:bold;
+  }
+  .set-row .pw{
+    color:var(--gold);
+    text-align:right;
+    font-weight:bold;
+  }
+
+  /* ── SYS-SPIEGEL (right col) ─────────────── */
+  #sys{
+    background:var(--bg2);
+    border-left:1px solid var(--line);
+    overflow-y:auto;
+    padding:8px 10px;
+    font-size:10.5px;
+  }
+  #sys::-webkit-scrollbar{width:6px;}
+  #sys::-webkit-scrollbar-thumb{background:var(--line);}
+
+  .sys-blk{
+    background:var(--bg3);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:7px 9px;
+    margin-bottom:6px;
+    position:relative;
+  }
+  .sys-blk.puls::before{
+    content:'';
+    position:absolute;
+    inset:-1px;
+    border-radius:4px;
+    background:linear-gradient(135deg,transparent,rgba(179,136,255,0.15),transparent);
+    pointer-events:none;
+    animation:shimmer 3s linear infinite;
+  }
+  @keyframes shimmer{
+    0%{opacity:.3;}
+    50%{opacity:.7;}
+    100%{opacity:.3;}
+  }
+  .sys-blk .h{
+    font-size:9px;
+    letter-spacing:1.5px;
+    color:var(--dim);
+    text-transform:uppercase;
+    margin-bottom:5px;
+    display:flex; justify-content:space-between;
+    font-family:var(--serif);
+  }
+  .sys-row{
+    display:flex; justify-content:space-between;
+    padding:1.5px 0;
+    font-size:10px;
+  }
+  .sys-row .k{color:var(--dim);}
+  .sys-row .v{color:var(--fg);font-weight:bold;}
+  .sys-row .v.ok{color:var(--green);}
+  .sys-row .v.warn{color:var(--gold);}
+  .sys-row .v.err{color:var(--red);}
+  .sys-row .v.cy{color:var(--cyan);}
+  .sys-row .v.vi{color:var(--violet);}
+  .sys-row .v.pk{color:var(--puls);}
+  .sys-row .v.gd{color:var(--gold2);}
+
+  /* ── MOVE-EMBED (unten, volle breite) ────── */
+  #moveWrap{
+    grid-column:1 / -1;
+    height:300px;
+    display:flex; flex-direction:column;
+    background:var(--bg2);
+    border:1px solid var(--line);
+    border-radius:5px;
+    overflow:hidden;
+  }
+  #moveHdr{
+    height:24px;
+    background:var(--bg3);
+    border-bottom:1px solid var(--line);
+    display:flex; align-items:center;
+    padding:0 12px;
+    font-size:10px; letter-spacing:1.5px;
+    color:var(--gold);
+    text-transform:uppercase;
+    gap:10px;
+    flex-shrink:0;
+    font-family:var(--serif);
+  }
+  #moveHdr .badge{
+    margin-left:auto;
+    color:var(--dim);
+    font-size:9px;
+    font-family:var(--mono);
+  }
+  #moveFrame{
+    flex:1;
+    border:0;
+    background:var(--bg);
+    width:100%;
+  }
+
+  /* ── BOTTOM: CLI ─────────────────────────── */
+  #cli{
+    height:140px;
+    background:#05080c;
+    border-top:1px solid var(--line);
+    display:flex; flex-direction:column;
+    flex-shrink:0;
+  }
+  #cliHdr{
+    height:20px;
+    background:var(--bg2);
+    border-bottom:1px solid var(--line);
+    display:flex; align-items:center;
+    padding:0 12px;
+    font-size:9px; letter-spacing:1.5px;
+    color:var(--dim);
+    text-transform:uppercase;
+    gap:12px;
+    font-family:var(--serif);
+  }
+  #cliHdr .tab{
+    color:var(--violet);
+    cursor:pointer;
+    letter-spacing:1.5px;
+  }
+  #cliHdr .tab.active{
+    color:var(--gold);
+    border-bottom:1px solid var(--gold);
+    padding-bottom:1px;
+  }
+  #log{
+    flex:1;
+    padding:6px 12px;
+    overflow-y:auto;
+    font-size:10px;
+    line-height:1.5;
+    color:var(--dim);
+    font-family:var(--mono);
+  }
+  #log::-webkit-scrollbar{width:6px;}
+  #log::-webkit-scrollbar-thumb{background:var(--line);}
+  #log .ln{white-space:pre-wrap;word-break:break-all;}
+  #log .ts{color:var(--dim2);margin-right:6px;}
+  #log .ok{color:var(--green);}
+  #log .warn{color:var(--gold);}
+  #log .err{color:var(--red);}
+  #log .info{color:var(--cyan);}
+  #log .vio{color:var(--violet);}
+  #log .puls{color:var(--puls);}
+  #log .orakel{color:var(--orakel);}
+
+  #cliInput{
+    height:24px;
+    background:var(--bg3);
+    border-top:1px solid var(--line);
+    display:flex; align-items:center;
+    padding:0 12px;
+    font-size:11px;
+    flex-shrink:0;
+  }
+  #cliInput .prompt{color:var(--gold);margin-right:6px;font-weight:bold;}
+  #cliInput input{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--fg);
+    font-family:var(--mono);
+    font-size:11px;
+    outline:none;
+  }
+  #cliInput input::placeholder{color:var(--dim2);}
+
+  /* ── BOOT OVERLAY ────────────────────────── */
+  #boot{
+    position:fixed; inset:0;
+    background:#000;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:14px;
+    z-index:9999;
+    font-size:12px;
+    color:var(--violet);
+    letter-spacing:2px;
+    transition:opacity .6s;
+  }
+  #boot.done{opacity:0;pointer-events:none;}
+  #boot .logo{
+    font-size:44px;
+    color:var(--gold);
+    letter-spacing:10px;
+    font-weight:bold;
+    text-shadow:
+      0 0 30px rgba(255,204,68,0.7),
+      0 0 60px rgba(179,136,255,0.5);
+    animation:logoPulse 2s ease-in-out infinite;
+    font-family:var(--serif);
+  }
+  @keyframes logoPulse{
+    0%,100%{transform:scale(1);filter:brightness(1);}
+    50%{transform:scale(1.03);filter:brightness(1.3);}
+  }
+  #boot .sub{
+    color:var(--puls);
+    font-size:11px;
+    letter-spacing:6px;
+    font-family:var(--serif);
+  }
+  #boot .lines{
+    width:500px; max-width:80%;
+    font-size:11px;
+    line-height:1.7;
+    text-align:left;
+    color:var(--green);
+    letter-spacing:0.5px;
+    font-family:var(--mono);
+  }
+  #boot .lines b{color:var(--gold);}
+  #boot .lines .dim{color:var(--dim2);}
+  #boot .lines .vio{color:var(--violet);}
+  #boot .progress{
+    width:500px; max-width:80%;
+    height:3px;
+    background:var(--bg3);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  #boot .progress .bar{
+    height:100%; width:0%;
+    background:linear-gradient(90deg,var(--violet),var(--puls),var(--gold));
+    transition:width .3s;
+  }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media(max-width:1100px){
+    #main{grid-template-columns: 190px 1fr 240px;}
+    #workBody{grid-template-columns:1fr;}
+    #moveWrap{height:260px;}
+  }
+  @media(max-width:820px){
+    #main{grid-template-columns:1fr;}
+    #tree, #sys{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ BOOT ═══ -->
+<div id="boot">
+  <div class="logo">◈ ORAKEL</div>
+  <div class="sub">MOVE · PULS · MATHEMATIK</div>
+  <div class="lines" id="bootLines"></div>
+  <div class="progress"><div class="bar" id="bootBar"></div></div>
+</div>
+
+<!-- ═══ DESKTOP ═══ -->
+<div id="pe">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <span class="logo">◈ ORAKEL<b>::MOVE</b></span>
+    <span class="sep"></span>
+    <span style="color:var(--dim);">root &gt; orakel &gt; move.html</span>
+    <div class="stat">
+      <span>PULS <b class="pk" id="tPuls">0</b></span>
+      <span>MATH <b id="tMath">0</b></span>
+      <span>SETS <b class="vio" id="tSets">0</b></span>
+      <span>ARG <b id="tArg">50%</b></span>
+      <span>SYNC <b id="tSync">0</b></span>
+      <span>FL76 <b id="tFl">76</b></span>
+      <span id="clock">--:--:--</span>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- LEFT: TREE -->
+    <div id="tree">
+      <div class="tree-hdr">▸ Root</div>
+      <div class="tree-item active" data-st="orakel"><span>◈ ORAKEL</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="root"><span>◈ ROOT</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="sys"><span>⚙ SYS.html</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="stage"><span>▤ stage.html</span><span class="ind on">●</span></div>
+
+      <div class="tree-hdr">▸ Orakel-Index</div>
+      <div class="tree-item pulse" data-st="move"><span>▶ move.html</span><span class="ind">★</span></div>
+      <div class="tree-item" data-st="grid"><span>▦ index.grid</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="holo"><span>◍ index.holo</span><span class="ind on">●</span></div>
+      <div class="tree-item pulse" data-st="live"><span>◉ index.live</span><span class="ind">★</span></div>
+      <div class="tree-item" data-st="liveau"><span>◆ index.live.html</span><span class="ind on">●</span></div>
+
+      <div class="tree-hdr">▸ Mathematik</div>
+      <div class="tree-item" data-st="fib"><span>∿ Fibonacci</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="prime"><span>℘ Primzahlen</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="entropy"><span>H Entropie</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="wave"><span>≈ Welle</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="ratio"><span>φ Verhältnis</span><span class="ind on">●</span></div>
+
+      <div class="tree-hdr">▸ Raw</div>
+      <div class="tree-item" data-st="raw"><span>◆ orakel.raw</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="pover"><span>◆ sli.pover</span><span class="ind on">●</span></div>
+
+      <div class="tree-hdr">▸ Engines</div>
+      <div class="tree-item" data-st="3js"><span>⚙ 3.js</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="9js"><span>⚙ 9.js</span><span class="ind on">●</span></div>
+      <div class="tree-item" data-st="81js"><span>⚙ 81.js</span><span class="ind on">●</span></div>
+
+      <div class="tree-hdr">▸ Links</div>
+      <div class="tree-item" data-st="markt"><span>🏪 Markt-Station</span><span class="ind" style="color:var(--cyan)">↗</span></div>
+      <div class="tree-item" data-st="api"><span>◈ api.cntrl</span><span class="ind" style="color:var(--cyan)">↗</span></div>
+      <div class="tree-item" data-st="mind"><span>🧠 mind.html</span><span class="ind" style="color:var(--cyan)">↗</span></div>
+    </div>
+
+    <!-- CENTER: WORKSPACE -->
+    <div id="work">
+      <div id="workHdr">
+        <span>◈ ORAKEL · PULS · MATHEMATIK</span>
+        <span class="path">/root/orakel/<b id="workPath">move</b></span>
+      </div>
+      <div id="workBody">
+
+        <!-- PULS-KERN (full width) -->
+        <div class="panel pulse-border" style="grid-column:1 / -1;">
+          <h3>◈ PULS-KERN <span class="badge puls" id="pulsBadge">idle</span></h3>
+          <div id="pulsWrap">
+            <div id="pulsOrbWrap">
+              <svg viewBox="-140 -140 280 280">
+                <circle cx="0" cy="0" r="120" fill="none"
+                  stroke="rgba(179,136,255,0.12)" stroke-width="1"/>
+                <circle cx="0" cy="0" r="95" fill="none"
+                  stroke="rgba(255,204,68,0.12)" stroke-width="0.7" stroke-dasharray="4 8"/>
+                <circle cx="0" cy="0" r="72" fill="none"
+                  stroke="rgba(255,102,200,0.12)" stroke-width="0.7" stroke-dasharray="3 6"/>
+                <circle cx="0" cy="0" r="50" fill="none"
+                  stroke="rgba(95,200,255,0.1)" stroke-width="0.5" stroke-dasharray="2 4"/>
+                <line x1="-120" y1="0" x2="120" y2="0"
+                  stroke="rgba(179,136,255,0.08)" stroke-width="0.5"/>
+                <line x1="0" y1="-120" x2="0" y2="120"
+                  stroke="rgba(179,136,255,0.08)" stroke-width="0.5"/>
+                <g id="orbRings"></g>
+              </svg>
+              <div id="pulsCore">
+                <span id="pulsGlyph">◈</span>
+              </div>
+              <div id="pulsNum">0</div>
+            </div>
+
+            <div class="puls-info">
+              <div class="hero" id="pulsHero">◈ ORAKEL ◈</div>
+              <div class="sub">puls · mathematik · spiegel</div>
+              <div class="grid">
+                <div class="cell v1"><span class="k">FIB</span><span class="v" id="mFib">0</span></div>
+                <div class="cell v2"><span class="k">PRIME</span><span class="v" id="mPrime">0</span></div>
+                <div class="cell v3"><span class="k">ENTROPIE</span><span class="v" id="mEnt">0.000</span></div>
+                <div class="cell v4"><span class="k">WELLE</span><span class="v" id="mWave">0.000</span></div>
+                <div class="cell v5"><span class="k">PHI</span><span class="v" id="mPhi">0.000</span></div>
+                <div class="cell v1"><span class="k">TICKS</span><span class="v" id="mTicks">0</span></div>
+                <div class="cell v2"><span class="k">SETS</span><span class="v" id="mSets">0</span></div>
+                <div class="cell v3"><span class="k">PULS-Hz</span><span class="v" id="mHz">0.0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MATHEMATIK · LIVE -->
+        <div class="panel">
+          <h3>◈ Mathematik · Live <span class="badge ok" id="mathBadge">rechnet</span></h3>
+          <div class="math-grid" id="mathRows"></div>
+          <div style="display:flex; gap:4px; margin-top:8px; flex-wrap:wrap;">
+            <button class="mbtn gold" id="btnCalc">⟳ calc</button>
+            <button class="mbtn" id="btnSpin">▶ spin</button>
+            <button class="mbtn vio" id="btnRand">🎲 rand</button>
+            <button class="mbtn puls" id="btnPulse">◈ puls</button>
+          </div>
+        </div>
+
+        <!-- ORAKEL · SETS -->
+        <div class="panel">
+          <h3>◈ Orakel · Sets <span class="badge vio" id="setBadge">6 sets</span></h3>
+          <div id="setRows"></div>
+          <div style="display:flex; gap:4px; margin-top:8px; flex-wrap:wrap;">
+            <button class="mbtn vio" id="btnProphecy">◈ prophezeiung</button>
+            <button class="mbtn" id="btnSetRnd">🎲 streuen</button>
+          </div>
+        </div>
+
+        <!-- MOVE-EMBED -->
+        <div id="moveWrap">
+          <div id="moveHdr">
+            ◈ ORAKEL · MOVE.HTML
+            <span class="badge" id="moveBadge">iframe · original</span>
+          </div>
+          <iframe id="moveFrame" src="move.html" title="Orakel Move"></iframe>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: SYS-SPIEGEL -->
+    <div id="sys">
+
+      <div class="sys-blk puls">
+        <div class="h"><span>SYS · SPIEGEL</span><span style="color:var(--green)">●</span></div>
+        <div class="sys-row"><span class="k">mode</span><span class="v vi">ORAKEL</span></div>
+        <div class="sys-row"><span class="k">loop</span><span class="v">1.loop</span></div>
+        <div class="sys-row"><span class="k">zone</span><span class="v cy">c.zone</span></div>
+        <div class="sys-row"><span class="k">rom</span><span class="v">s.hdf · u.hdf</span></div>
+        <div class="sys-row"><span class="k">raw</span><span class="v cy">orakel.raw</span></div>
+      </div>
+
+      <div class="sys-blk">
+        <div class="h"><span>ARG.SYNC</span><span style="color:var(--violet)">◈</span></div>
+        <div class="sys-row"><span class="k">arg</span><span class="v ok" id="sArg">50.0%</span></div>
+        <div class="sys-row"><span class="k">xarg</span><span class="v warn" id="sXarg">30.0%</span></div>
+        <div class="sys-row"><span class="k">tmparg</span><span class="v vi" id="sTmp">20.0%</span></div>
+        <div class="sys-row"><span class="k">syncs</span><span class="v pk" id="sSync">0</span></div>
+      </div>
+
+      <div class="sys-blk">
+        <div class="h"><span>MATH · LIVE</span></div>
+        <div class="sys-row"><span class="k">fib</span><span class="v gd" id="sFib">0</span></div>
+        <div class="sys-row"><span class="k">prime</span><span class="v gd" id="sPrime">—</span></div>
+        <div class="sys-row"><span class="k">entropie</span><span class="v pk" id="sEnt">0.000</span></div>
+        <div class="sys-row"><span class="k">welle</span><span class="v cy" id="sWave">0.000</span></div>
+        <div class="sys-row"><span class="k">phi</span><span class="v vi" id="sPhi">1.618</span></div>
+      </div>
+
+      <div class="sys-blk">
+        <div class="h"><span>PULS · ZUSTAND</span></div>
+        <div class="sys-row"><span class="k">state</span><span class="v pk" id="sState">idle</span></div>
+        <div class="sys-row"><span class="k">pulse</span><span class="v gd" id="sPulse">0</span></div>
+        <div class="sys-row"><span class="k">hz</span><span class="v cy" id="sHz">0.0</span></div>
+        <div class="sys-row"><span class="k">ticks</span><span class="v" id="sTicks">0</span></div>
+      </div>
+
+      <div class="sys-blk">
+        <div class="h"><span>RAW-WERTE</span></div>
+        <div class="sys-row"><span class="k">orakel.raw</span><span class="v cy" id="sRaw">—</span></div>
+        <div class="sys-row"><span class="k">sli.pover</span><span class="v cy" id="sPover">—</span></div>
+      </div>
+
+      <div class="sys-blk">
+        <div class="h"><span>FL76 · TICK</span></div>
+        <div class="sys-row"><span class="k">raw</span><span class="v" id="sFlRaw">76 ms</span></div>
+        <div class="sys-row"><span class="k">smooth</span><span class="v ok" id="sFlSm">76 ms</span></div>
+        <div class="sys-row"><span class="k">fenster</span><span class="v ok" id="sFlWin">kaiser</span></div>
+      </div>
+
+      <div class="sys-blk">
+        <div class="h"><span>TASTEN</span></div>
+        <div class="sys-row"><span class="k">C</span><span class="v">calc</span></div>
+        <div class="sys-row"><span class="k">P</span><span class="v">puls</span></div>
+        <div class="sys-row"><span class="k">Y</span><span class="v">sync</span></div>
+        <div class="sys-row"><span class="k">Space</span><span class="v">prophecy</span></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- BOTTOM: CLI -->
+  <div id="cli">
+    <div id="cliHdr">
+      <span class="tab active" data-tab="orakel">ORAKEL</span>
+      <span class="tab" data-tab="math">MATH</span>
+      <span class="tab" data-tab="sets">SETS</span>
+      <span class="tab" data-tab="raw">RAW</span>
+      <span style="margin-left:auto;color:var(--dim2);font-size:9px;">log · 100 zeilen</span>
+    </div>
+    <div id="log"></div>
+    <div id="cliInput">
+      <span class="prompt">orakel&gt;</span>
+      <input id="cmdInput" placeholder="befehl: calc · puls · prophecy · status · help" autocomplete="off">
+    </div>
+  </div>
+
+</div>
+
+<style>
+  /* kleine Extra-Buttons für Math-Panel */
+  .mbtn{
+    background:var(--bg3);
+    color:var(--fg);
+    border:1px solid var(--line);
+    padding:5px 10px;
+    border-radius:3px;
+    font-family:inherit;
+    font-size:9.5px;
+    letter-spacing:1px;
+    cursor:pointer;
+    transition:.15s;
+    text-transform:uppercase;
+    flex:1;
+    min-width:60px;
+  }
+  .mbtn:hover{
+    border-color:var(--violet);
+    background:rgba(179,136,255,0.1);
+    color:var(--violet);
+  }
+  .mbtn.gold{border-color:rgba(255,204,68,0.4);color:var(--gold);}
+  .mbtn.gold:hover{background:rgba(255,204,68,0.12);border-color:var(--gold);color:#fff;}
+  .mbtn.vio{border-color:rgba(179,136,255,0.4);color:var(--violet);}
+  .mbtn.vio:hover{background:rgba(179,136,255,0.12);border-color:var(--violet);color:#fff;}
+  .mbtn.puls{border-color:rgba(255,102,200,0.4);color:var(--puls);}
+  .mbtn.puls:hover{background:rgba(255,102,200,0.12);border-color:var(--puls);color:#fff;}
+</style>
+
+<script>
+"use strict";
+// ═══════════════════════════════════════════════════════════════════
+// ◈ ORAKEL · MOVE · PULS · MATHEMATIK
+// Sys-Spiegel mit pulsierender Mathematik. Der Orakel-Kern rechnet live.
+// ═══════════════════════════════════════════════════════════════════
+
+// ─── ORAKEL SETS (Narrative · Konstellationen) ───────────
+const SETS = [
+  { id:'s1', ic:'◉', name:'MOVE',      sub:'bewegung',    cnt:81,  pw:0.14, w:0.15 },
+  { id:'s2', ic:'◍', name:'HOLO',      sub:'ganzheit',    cnt:64,  pw:0.22, w:0.18 },
+  { id:'s3', ic:'▦', name:'GRID',      sub:'struktur',    cnt:49,  pw:0.16, w:0.12 },
+  { id:'s4', ic:'◆', name:'LIVE',      sub:'puls',        cnt:36,  pw:0.28, w:0.20 },
+  { id:'s5', ic:'◇', name:'PRIME',     sub:'unzerlegbar', cnt:25,  pw:0.12, w:0.15 },
+  { id:'s6', ic:'∿', name:'WAVE',      sub:'rhythmus',    cnt:16,  pw:0.08, w:0.10 },
+];
+
+// ─── MATH LIVE · ROWS ─────────────────────────────────────
+const MATH_ROWS = [
+  { id:'fib',     lbl:'∿ Fibonacci',  eq:'F(n) = F(n-1) + F(n-2)' },
+  { id:'prime',   lbl:'℘ Primzahlen', eq:'p | n · n mod p ≠ 0 ∀ p<n' },
+  { id:'entropy', lbl:'H Entropie',   eq:'H = -Σ p · log₂(p)' },
+  { id:'wave',    lbl:'≈ Welle',      eq:'y = sin(ωt) · e^(-αt)' },
+  { id:'phi',     lbl:'φ Verhältnis', eq:'φ = (1+√5) / 2' },
+  { id:'ratio',   lbl:'Σ Verhältnis', eq:'R = Σact / Σtot' },
+  { id:'pulsHz',  lbl:'◈ Puls-Freq',  eq:'f = 1/T  [Hz]' },
+];
+
+// ─── STATE ────────────────────────────────────────────────
+const S = {
+  tick: 0,
+  pulse: 0,
+  pulsePhase: 0,
+  hz: 0,
+  lastPulseT: 0,
+  pulsesInSecond: 0,
+  lastHzSample: 0,
+  // math
+  fibA: 0, fibB: 1, fibIndex: 0,
+  primeMax: 30, primes: [2,3,5,7,11,13,17,19,23,29],
+  entropy: 0,
+  waveVal: 0,
+  waveT: 0,
+  phi: 1.6180339887,
+  ratio: 0.5,
+  pulsHz: 0.8,
+  // arg.sync
+  arg: 0.5, xarg: 0.3, tmparg: 0.2,
+  syncCount: 0,
+  // raw
+  rawVal: 0,
+  pover: 0,
+  // state
+  state: 'idle',
+  spinning: false,
+  spinTimer: null,
+  // FL76
+  flRaw: 76, flSmooth: 76, lastFrameT: 0,
+  // mathHistory
+  mathHistory: [],
+};
+
+// ─── UTILS ────────────────────────────────────────────────
+function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+function rand(a,b){ return a + Math.random()*(b-a); }
+function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+// ─── LOG ──────────────────────────────────────────────────
+const logEl = document.getElementById('log');
+function log(msg, cls = '') {
+  const t = new Date().toLocaleTimeString('de-DE');
+  const div = document.createElement('div');
+  div.className = 'ln';
+  div.innerHTML = `<span class="ts">[${t}]</span><span class="${cls}">${msg}</span>`;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+  while (logEl.children.length > 100) logEl.removeChild(logEl.firstChild);
+}
+
+// ═══════════════════════════════════════════════════════════
+// PULS-KERN (Herzschlag der Mathematik)
+// ═══════════════════════════════════════════════════════════
+function pulse(force) {
+  S.pulse++;
+  S.pulsesInSecond++;
+  const core = document.getElementById('pulsCore');
+  core.classList.remove('tick');
+  void core.offsetWidth; // reflow
+  core.classList.add('tick');
+  setTimeout(() => core.classList.remove('tick'), 320);
+
+  // Big number aktualisieren
+  const num = document.getElementById('pulsNum');
+  const glyph = document.getElementById('pulsGlyph');
+  // Kombiniere fib + pulse zu einer sichtbaren Zahl
+  const display = (S.fibB + S.pulse) % 9999;
+  num.textContent = display;
+  glyph.textContent = '';
+
+  // Farbe nach State
+  const colors = {
+    idle:    ['#ffe9b0','#ffcc44','#b388ff'],
+    active:  ['#c8f0ff','#5fc8ff','#b388ff'],
+    spinning:['#ff88b0','#ff66c8','#b388ff'],
+  };
+  const [c1,c2,c3] = colors[S.state] || colors.idle;
+  core.style.background = `radial-gradient(circle at 40% 35%, #ffffff 0%, ${c1} 15%, ${c2} 35%, ${c3} 65%, #2a1050 100%)`;
+
+  // Orb-Rings pulse
+  document.querySelectorAll('#orbRings circle').forEach((c,i) => {
+    c.setAttribute('r', 60 + i*15 + Math.sin(S.tick * 0.1 + i) * 3);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// MATHEMATIK
+// ═══════════════════════════════════════════════════════════
+function calcMath() {
+  // Fibonacci advance
+  const next = S.fibA + S.fibB;
+  S.fibA = S.fibB;
+  S.fibB = next;
+  S.fibIndex++;
+  if (S.fibB > 99999) { S.fibA = 0; S.fibB = 1; S.fibIndex = 0; }
+
+  // Prime check (nächste Zahl nach aktueller)
+  const candidate = S.primeMax + 1 + Math.floor(Math.random() * 5);
+  let isPrime = true;
+  for (let i = 2; i <= Math.sqrt(candidate); i++) {
+    if (candidate % i === 0) { isPrime = false; break; }
+  }
+  if (isPrime) S.primes.push(candidate);
+  S.primeMax = candidate;
+
+  // Entropie aus 6 Sets (Verteilung)
+  const total = SETS.reduce((a,s) => a + s.cnt, 0);
+  let H = 0;
+  SETS.forEach(s => {
+    const p = s.cnt / total;
+    if (p > 0) H -= p * Math.log2(p);
+  });
+  S.entropy = H;
+
+  // Welle
+  S.waveT += 0.05;
+  S.waveVal = Math.sin(S.waveT) * Math.exp(-S.waveT * 0.02);
+
+  // Phi (live, als goldener Schnitt aus fib)
+  if (S.fibA > 0) S.phi = S.fibB / S.fibA;
+
+  // Ratio
+  const setSum = SETS.reduce((a,s) => a + s.pw, 0);
+  S.ratio = setSum / 6;
+
+  // Puls-Frequenz
+  const now = performance.now();
+  if (now - S.lastHzSample > 1000) {
+    S.hz = S.pulsesInSecond;
+    S.pulsesInSecond = 0;
+    S.lastHzSample = now;
+    S.pulsHz = S.hz;
+  }
+
+  // History
+  S.mathHistory.push({
+    t: S.tick,
+    fib: S.fibB,
+    prime: S.primeMax,
+    entropy: S.entropy,
+    wave: S.waveVal,
+    phi: S.phi,
+  });
+  if (S.mathHistory.length > 200) S.mathHistory.shift();
+
+  renderMath();
+  renderPulsInfo();
+}
+
+function renderMath() {
+  const el = document.getElementById('mathRows');
+  el.innerHTML = MATH_ROWS.map(r => {
+    let val = '';
+    switch(r.id) {
+      case 'fib':     val = `F(${S.fibIndex}) = ${S.fibB}`; break;
+      case 'prime':   val = `${S.primes.length} primes · max ${S.primeMax}`; break;
+      case 'entropy': val = S.entropy.toFixed(3); break;
+      case 'wave':    val = S.waveVal.toFixed(3); break;
+      case 'phi':     val = S.phi.toFixed(4); break;
+      case 'ratio':   val = S.ratio.toFixed(3); break;
+      case 'pulsHz':  val = S.pulsHz.toFixed(1) + ' Hz'; break;
+    }
+    return `
+      <div class="math-row">
+        <span class="lbl">${r.lbl}</span>
+        <span class="eq">${r.eq}</span>
+        <span class="res">${val}</span>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('mathBadge').textContent =
+    S.spinning ? 'spin' : 'rechnet';
+}
+
+function renderPulsInfo() {
+  document.getElementById('mFib').textContent = S.fibB;
+  document.getElementById('mPrime').textContent = S.primeMax;
+  document.getElementById('mEnt').textContent = S.entropy.toFixed(3);
+  document.getElementById('mWave').textContent = S.waveVal.toFixed(3);
+  document.getElementById('mPhi').textContent = S.phi.toFixed(3);
+  document.getElementById('mTicks').textContent = S.tick;
+  document.getElementById('mSets').textContent = SETS.length;
+  document.getElementById('mHz').textContent = S.pulsHz.toFixed(1);
+
+  // Sys-Spiegel
+  document.getElementById('sFib').textContent = S.fibB;
+  document.getElementById('sPrime').textContent = S.primeMax;
+  document.getElementById('sEnt').textContent = S.entropy.toFixed(3);
+  document.getElementById('sWave').textContent = S.waveVal.toFixed(3);
+  document.getElementById('sPhi').textContent = S.phi.toFixed(4);
+  document.getElementById('sTicks').textContent = S.tick;
+  document.getElementById('sHz').textContent = S.pulsHz.toFixed(1);
+
+  document.getElementById('tPuls').textContent = S.pulse;
+  document.getElementById('tMath').textContent = S.mathHistory.length;
+  document.getElementById('tSets').textContent = SETS.length;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ORAKEL SETS · RENDER
+// ═══════════════════════════════════════════════════════════
+function renderSets() {
+  const el = document.getElementById('setRows');
+  el.innerHTML = SETS.map(s => `
+    <div class="set-row" data-id="${s.id}">
+      <span class="ic">${s.ic}</span>
+      <span class="name">${s.name}<small>${s.sub}</small></span>
+      <span class="cnt">${s.cnt}</span>
+      <span class="pw">${s.pw.toFixed(3)}</span>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('.set-row').forEach(r => {
+    r.addEventListener('click', () => {
+      const s = SETS.find(x => x.id === r.dataset.id);
+      if (s) {
+        s.cnt = Math.max(1, s.cnt + Math.floor(rand(-3, 4)));
+        s.pw = clamp01(s.pw + rand(-0.05, 0.05));
+        log(`◈ SET ${s.name} · cnt=${s.cnt} · pw=${s.pw.toFixed(3)}`, 'puls');
+        renderSets();
+        calcMath();
+      }
+    });
+  });
+
+  document.getElementById('setBadge').textContent = `${SETS.length} sets`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ORAKEL · PROPHEZEIUNG
+// ═══════════════════════════════════════════════════════════
+const PROPHECY_TEMPLATES = [
+  'Wenn {A} sich zu {B} verhält, öffnet sich {C}.',
+  'Der Puls bei {A} Hz trägt die Set-Familie {B}.',
+  'Aus {A} Feldern entstehen {B} neue Pfade.',
+  'Die Entropie {A} kündigt {B} an.',
+  'φ bei {A} schließt den Kreis zu {B}.',
+  'Aus {A} entsteht in {B} Ticks ein neues Set.',
+];
+
+function prophecy() {
+  const a = choice(SETS);
+  const b = choice(SETS);
+  const c = choice(['Licht','Puls','Rauschen','Stille','Kern','Ring','Welle','Echo']);
+  const tpl = choice(PROPHECY_TEMPLATES);
+  const fib = S.fibB;
+  const hz = S.pulsHz.toFixed(1);
+  const ent = S.entropy.toFixed(3);
+
+  let msg = tpl
+    .replace('{A}', choice([`Fibonacci ${fib}`, `Puls ${hz}`, `Entropie ${ent}`, `${a.name}(${a.cnt})`]))
+    .replace('{B}', choice([b.name, `${b.cnt}`, `Set·${b.sub}`, `${b.pw.toFixed(2)}`]))
+    .replace('{C}', c);
+
+  log(`◈ PROPHECY · ${msg}`, 'orakel');
+  return msg;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ARG.SYNC (kleiner, hält die sys-Werte)
+// ═══════════════════════════════════════════════════════════
+function argSync() {
+  const setSum = SETS.reduce((a,s) => a + s.pw * s.w, 0);
+  const mathSum = clamp01((S.fibB % 100) / 100);
+  const entSum = clamp01(S.entropy / 2.6);
+
+  S.arg    = clamp01(setSum * 0.5 + mathSum * 0.3 + (Math.random()-0.5)*0.06);
+  S.xarg   = clamp01(entSum * 0.6 + setSum * 0.3 + (Math.random()-0.5)*0.06);
+  S.tmparg = clamp01(mathSum * 0.4 + entSum * 0.3 + (Math.random()-0.5)*0.08);
+
+  const sum = S.arg + S.xarg + S.tmparg || 1;
+  S.arg /= sum; S.xarg /= sum; S.tmparg /= sum;
+  S.syncCount++;
+
+  S.rawVal = (S.rawVal + Math.floor(rand(1, 20))) % 256;
+  S.pover = clamp01(S.pover + rand(-0.05, 0.08));
+
+  // Sys-Spiegel
+  document.getElementById('sArg').textContent = (S.arg*100).toFixed(1) + '%';
+  document.getElementById('sXarg').textContent = (S.xarg*100).toFixed(1) + '%';
+  document.getElementById('sTmp').textContent = (S.tmparg*100).toFixed(1) + '%';
+  document.getElementById('sSync').textContent = S.syncCount;
+  document.getElementById('sRaw').textContent = S.rawVal;
+  document.getElementById('sPover').textContent = S.pover.toFixed(2);
+  document.getElementById('tArg').textContent = (S.arg*100).toFixed(0) + '%';
+  document.getElementById('tSync').textContent = S.syncCount;
+
+  log(`⟳ arg.sync · arg=${(S.arg*100).toFixed(1)}% · xarg=${(S.xarg*100).toFixed(1)}% · tmparg=${(S.tmparg*100).toFixed(1)}%`, 'vio');
+
+  // Nach oben (parent)
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type:'arg.sync', from:'orakel',
+        payload:{ arg:S.arg, xarg:S.xarg, tmparg:S.tmparg, pulse:S.pulse, fib:S.fibB },
+      }, '*');
+    }
+  } catch(_){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// SPIN / RANDOM / PULS-STATE
+// ═══════════════════════════════════════════════════════════
+function startSpin() {
+  if (S.spinTimer) return;
+  S.spinning = true;
+  S.state = 'spinning';
+  document.getElementById('pulsBadge').textContent = 'spin';
+  document.getElementById('sState').textContent = 'spinning';
+  S.spinTimer = setInterval(() => {
+    // Zufällige SET-Gewichte
+    SETS.forEach(s => {
+      s.cnt = Math.max(1, s.cnt + Math.floor(rand(-5, 6)));
+      s.pw = clamp01(s.pw + rand(-0.08, 0.08));
+    });
+    calcMath();
+    pulse();
+  }, 250);
+  log('▶ spin · sets rotieren · puls läuft', 'puls');
+}
+
+function stopSpin() {
+  S.spinning = false;
+  S.state = 'active';
+  if (S.spinTimer) { clearInterval(S.spinTimer); S.spinTimer = null; }
+  document.getElementById('pulsBadge').textContent = 'active';
+  document.getElementById('sState').textContent = 'active';
+  log('⏸ spin gestoppt · puls beruhigt', 'warn');
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOOP
+// ═══════════════════════════════════════════════════════════
+function loop(now) {
+  S.tick++;
+
+  // Puls-Rhythmus: alle ~800ms ein Puls (wenn aktiv), 1.2s wenn idle
+  const interval = S.state === 'spinning' ? 350 : S.state === 'active' ? 700 : 1200;
+  if (now - S.lastPulseT > interval) {
+    S.lastPulseT = now;
+    pulse();
+    calcMath();
+  }
+
+  if (S.tick % 30 === 0) updateClock();
+  if (S.tick % 90 === 0) argSync();
+
+  requestAnimationFrame(loop);
+}
+
+// ═══════════════════════════════════════════════════════════
+// FL76
+// ═══════════════════════════════════════════════════════════
+function tickFl(now) {
+  if (S.lastFrameT > 0) {
+    S.flRaw = now - S.lastFrameT;
+    S.flSmooth = S.flSmooth * 0.88 + S.flRaw * 0.12;
+  }
+  S.lastFrameT = now;
+  const fl = Math.round(S.flSmooth);
+  document.getElementById('tFl').textContent = fl;
+  document.getElementById('sFlRaw').textContent = Math.round(S.flRaw) + ' ms';
+  document.getElementById('sFlSm').textContent = fl + ' ms';
+  const win = fl >= 60 && fl <= 90 ? 'kaiser' : (fl < 40 || fl > 120 ? 'outside' : 'edge');
+  document.getElementById('sFlWin').textContent = win;
+  document.getElementById('sFlWin').className = 'v ' + (win === 'kaiser' ? 'ok' : win === 'edge' ? 'warn' : 'err');
+  requestAnimationFrame(tickFl);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════════════════
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('de-DE');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ORB-RINGS INIT
+// ═══════════════════════════════════════════════════════════
+function buildOrbRings() {
+  const g = document.getElementById('orbRings');
+  if (!g) return;
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const r = 60 + i * 12;
+    const x = Math.cos(angle) * r;
+    const y = Math.sin(angle) * r;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', y);
+    circle.setAttribute('r', 4);
+    circle.setAttribute('fill', 'rgba(6,10,18,0.9)');
+    circle.setAttribute('stroke', ['#d8b4ff','#ffcc44','#ff66c8','#5fc8ff','#8cf0d0','#b388ff'][i]);
+    circle.setAttribute('stroke-width', '1.4');
+    circle.setAttribute('opacity', '0.85');
+    g.appendChild(circle);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLI
+// ═══════════════════════════════════════════════════════════
+function handleCmd(cmd) {
+  const c = cmd.trim().toLowerCase();
+  if (!c) return;
+  log(`orakel> ${cmd}`, 'info');
+  if (c === 'help') log('befehle: calc · puls · prophecy · sync · status · spin · stop · reset · raw · sets', 'ok');
+  else if (c === 'calc') calcMath();
+  else if (c === 'puls') pulse();
+  else if (c === 'prophecy') prophecy();
+  else if (c === 'sync') argSync();
+  else if (c === 'spin') startSpin();
+  else if (c === 'stop') stopSpin();
+  else if (c === 'reset') {
+    S.fibA = 0; S.fibB = 1; S.fibIndex = 0;
+    S.pulse = 0; S.entropy = 0; S.waveT = 0;
+    S.state = 'idle';
+    document.getElementById('sState').textContent = 'idle';
+    document.getElementById('pulsBadge').textContent = 'idle';
+    log('⟲ reset · orakel zurück', 'warn');
+  }
+  else if (c === 'raw') log(`raw · orakel.raw=${S.rawVal} · sli.pover=${S.pover.toFixed(2)}`, 'ok');
+  else if (c === 'sets') log(`sets · ${SETS.map(s => s.name+'('+s.cnt+')').join(' · ')}`, 'ok');
+  else if (c === 'status') {
+    log(`status · tick=${S.tick} · pulse=${S.pulse} · fib=${S.fibB} · ent=${S.entropy.toFixed(3)} · state=${S.state}`, 'ok');
+  }
+  else log(`unbekannt: ${c} · tippe "help"`, 'err');
+}
+
+document.getElementById('cmdInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    handleCmd(e.target.value);
+    e.target.value = '';
+  }
+});
+
+// CLI Tabs
+document.querySelectorAll('#cliHdr .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('#cliHdr .tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    log(`▸ Log-Tab: ${t.dataset.tab.toUpperCase()}`, 'info');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// TREE
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('#tree .tree-item').forEach(t => {
+  t.addEventListener('click', () => {
+    const st = t.dataset.st;
+    document.querySelectorAll('#tree .tree-item').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('workPath').textContent = st;
+
+    if (st === 'move') { document.getElementById('moveFrame').src = 'move.html'; log('↗ move.html in iframe geladen','vio'); return; }
+    if (st === 'live') { log('◉ index.live · pulsierender Stream aktiv','puls'); return; }
+    if (st === 'grid') { log('▦ index.grid · struktur raster gelesen','vio'); return; }
+    if (st === 'holo') { log('◍ index.holo · hologramm schicht aktiv','vio'); return; }
+    if (st === 'liveau') { log('◆ index.live.html · live-ansicht','vio'); return; }
+    if (st === 'fib' || st === 'prime' || st === 'entropy' || st === 'wave' || st === 'ratio') {
+      log(`∿ math-modul · ${st} im kern aktiv`, 'orakel');
+      calcMath();
+      return;
+    }
+    if (st === 'raw') { log(`◆ orakel.raw=${S.rawVal}`,'ok'); return; }
+    if (st === 'pover') { log(`◆ sli.pover=${S.pover.toFixed(2)}`,'ok'); return; }
+    if (st === 'markt') { log('↗ Markt-Station öffnen','info'); window.open('../markt/index.html','_blank'); return; }
+    if (st === 'api') { log('↗ api.cntrl öffnen','info'); window.open('../api.cntrl/index.html','_blank'); return; }
+    if (st === 'mind') { log('↗ mind.html öffnen','info'); window.open('../mind.html','_blank'); return; }
+    if (st === 'root') { log('◈ ROOT · tiefste ebene','ok'); return; }
+    if (st === 'sys') { log('⚙ SYS.html als kernel aktiv','ok'); return; }
+    if (st === 'stage') { log('▤ stage.html · sys-bühne','ok'); return; }
+    log(`▸ ${st} ausgewählt`,'info');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// BUTTONS
+// ═══════════════════════════════════════════════════════════
+document.getElementById('btnCalc').addEventListener('click', () => { calcMath(); pulse(); });
+document.getElementById('btnSpin').addEventListener('click', () => S.spinning ? stopSpin() : startSpin());
+document.getElementById('btnRand').addEventListener('click', () => {
+  SETS.forEach(s => {
+    s.cnt = Math.floor(rand(1, 100));
+    s.pw = clamp01(rand(0, 0.5));
+  });
+  renderSets(); calcMath();
+  log('🎲 sets gestreut','warn');
+});
+document.getElementById('btnPulse').addEventListener('click', () => {
+  pulse();
+  S.state = 'active';
+  document.getElementById('pulsBadge').textContent = 'active';
+  document.getElementById('sState').textContent = 'active';
+  log('◈ puls angeregt','puls');
+});
+document.getElementById('btnProphecy').addEventListener('click', prophecy);
+document.getElementById('btnSetRnd').addEventListener('click', () => {
+  SETS.forEach(s => s.cnt = Math.max(1, s.cnt + Math.floor(rand(-5, 6))));
+  renderSets(); calcMath();
+});
+
+// ═══════════════════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'IFRAME') return;
+  if (e.key === 'c' || e.key === 'C') { calcMath(); pulse(); }
+  if (e.key === 'p' || e.key === 'P') { pulse(); S.state='active'; document.getElementById('sState').textContent='active'; }
+  if (e.key === 'y' || e.key === 'Y') argSync();
+  if (e.key === ' ') { e.preventDefault(); prophecy(); }
+  if (e.key === 's' || e.key === 'S') S.spinning ? stopSpin() : startSpin();
+  if (e.key === 'r' || e.key === 'R') handleCmd('reset');
+});
+
+// ═══════════════════════════════════════════════════════════
+// BOOT SEQUENZ
+// ═══════════════════════════════════════════════════════════
+const BOOT_LINES = [
+  ['▸ NC-BIOS <b>ok</b> <span class="dim">· root tree mounted · orakel-slot</span>', 260],
+  ['▸ 3.js / 9.js / 81.js <b>ok</b> <span class="dim">· achs-engines geladen</span>', 300],
+  ['▸ SYS.html <b>als kernel</b> <span class="dim">· spiegel aktiv</span>', 280],
+  ['▸ move.html <b>eingebettet</b> <span class="dim">· original orakel-index</span>', 300],
+  ['▸ index.grid / holo / live <b>ok</b> <span class="dim">· 3 varianten</span>', 260],
+  ['▸ puls-kern <b>initialisiert</b> <span class="dim">· hz=0.8</span>', 300],
+  ['▸ mathematik <b>rechnet</b> <span class="dim">· fib · prime · entropy · wave · φ</span>', 320],
+  ['▸ orakel-sets <b>6 geladen</b> <span class="dim">· move · holo · grid · live · prime · wave</span>', 280],
+  ['▸ arg.sync <b>bereit</b> <span class="dim">· root ↔ orakel</span>', 260],
+  ['▸ FL76 <b>76 ms</b> <span class="dim">· kaiser-fenster</span>', 220],
+];
+
+function bootSequence() {
+  const linesEl = document.getElementById('bootLines');
+  const barEl = document.getElementById('bootBar');
+  linesEl.innerHTML = '';
+  let i = 0;
+  let total = 0;
+  const totalDur = BOOT_LINES.reduce((a,b) => a+b[1], 0);
+
+  function next() {
+    if (i >= BOOT_LINES.length) {
+      barEl.style.width = '100%';
+      setTimeout(() => document.getElementById('boot').classList.add('done'), 400);
+      return;
+    }
+    const [txt, delay] = BOOT_LINES[i];
+    const div = document.createElement('div');
+    div.innerHTML = txt;
+    linesEl.appendChild(div);
+    total += delay;
+    barEl.style.width = ((total / totalDur) * 100).toFixed(1) + '%';
+    i++;
+    setTimeout(next, delay);
+  }
+  next();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MESSAGES (von Root/Sys)
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('message', (ev) => {
+  const d = ev.data;
+  if (!d || !d.type) return;
+  if (d.type === 'arg.sync') {
+    S.syncCount++;
+    log(`⬇ SYNC ← root · ${d.payload ? JSON.stringify(d.payload).slice(0,40) : ''}`, 'vio');
+  }
+  if (d.type === 'sys.ready') {
+    log('⬇ sys.ready · root verbunden', 'ok');
+  }
+  if (d.type === 'reset') {
+    handleCmd('reset');
+  }
+  if (d.type === 'pulse') {
+    pulse();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+function init() {
+  bootSequence();
+  buildOrbRings();
+  renderMath();
+  renderSets();
+  renderPulsInfo();
+  calcMath();
+  argSync();
+  updateClock();
+
+  // Erster Puls
+  setTimeout(() => {
+    pulse();
+    S.state = 'active';
+    document.getElementById('pulsBadge').textContent = 'active';
+    document.getElementById('sState').textContent = 'active';
+  }, 1200);
+
+  log('◈ ORAKEL · MOVE · PULS · MATHEMATIK bereit', 'orakel');
+  log('→ sys-spiegel aktiv · move.html eingebettet', 'ok');
+  log('→ mathematik rechnet: fib · prime · entropy · wave · φ', 'puls');
+  log('→ orakel-sets geladen: 6 konstellationen', 'vio');
+  log('→ tasten: C=calc · P=puls · Y=sync · Space=prophecy · S=spin · R=reset', 'info');
+
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type:'orakel.ready', from:'orakel' }, '*');
+    }
+  } catch(_){}
+
+  requestAnimationFrame(tickFl);
+  requestAnimationFrame(loop);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PUBLIC API
+// ═══════════════════════════════════════════════════════════
+window.ORAKEL = {
+  calc:     () => { calcMath(); pulse(); },
+  pulse:    () => pulse(),
+  prophecy: () => prophecy(),
+  sync:     () => argSync(),
+  spin:     () => startSpin(),
+  stop:     () => stopSpin(),
+  reset:    () => handleCmd('reset'),
+  cmd:      (c) => handleCmd(c),
+  state:    () => ({
+    tick: S.tick, pulse: S.pulse, state: S.state,
+    fib: S.fibB, fibIndex: S.fibIndex,
+    primeMax: S.primeMax, primes: S.primes.slice(),
+    entropy: S.entropy, wave: S.waveVal, phi: S.phi,
+    pulsHz: S.pulsHz, ratio: S.ratio,
+    arg: S.arg, xarg: S.xarg, tmparg: S.tmparg,
+    syncCount: S.syncCount,
+    raw: S.rawVal, pover: S.pover,
+  }),
+  sets:     () => SETS.map(s => ({ ...s })),
+  math:     () => MATH_ROWS.map(r => ({ ...r })),
+  history:  () => S.mathHistory.slice(),
+};
+window.O = window.ORAKEL;
+
+console.log('%c◈ ORAKEL · MOVE · PULS · MATHEMATIK geladen',
+  'color:#b388ff;font-weight:bold;font-size:14px;');
+console.log('→ window.ORAKEL.calc() · .pulse() · .prophecy() · .state()');
+console.log('→ sys-spiegel · move.html iframe · 6 orakel-sets · live math');
+</script>
+</body>
+</html>
