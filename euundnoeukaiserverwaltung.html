@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>◈ VERWALTUNG · Wahrheit live</title>
+<style>
+:root{--bg:#04070e;--bg2:#0a101e;--fg:#c8d8e8;--dim:#5a7288;--green:#7ce0a8;--gold:#ffcc44;--red:#ff5a7a;--cyan:#5fc8ff;--line:rgba(140,180,220,.14)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font:13px Consolas,'Courier New',monospace;padding:14px;max-width:1000px;margin:auto}
+h1{color:var(--green);font-size:15px;letter-spacing:3px;font-weight:normal}
+.sub{color:var(--dim);font-size:11px;margin:4px 0 12px}
+h2{color:var(--green);font-size:11px;letter-spacing:2px;font-weight:normal;margin:14px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}
+.card,.box{background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:9px 11px}
+.card .k{color:var(--dim);font-size:10px;letter-spacing:1px}
+.card .v{font-size:17px;margin:4px 0;word-break:break-word}
+.tag{font-size:9px;padding:1px 6px;border-radius:3px;border:1px solid var(--line)}
+.tag.m{color:var(--green)}.tag.a{color:var(--gold)}
+.ok{color:var(--green)}.warn{color:var(--gold)}.err{color:var(--red)}
+table{width:100%;border-collapse:collapse}
+td,th{padding:5px 6px;border-bottom:1px dashed var(--line);text-align:left;font-weight:normal}
+th{color:var(--dim);font-size:10px}
+canvas{width:100%;height:140px;display:block;background:#02040a;border-radius:4px}
+.leg{font-size:10px;margin-top:5px;color:var(--dim)}
+button{background:var(--bg2);color:var(--green);border:1px solid var(--green);padding:6px 12px;border-radius:3px;font:inherit;cursor:pointer;margin-top:8px}
+button:hover{background:rgba(124,224,168,.12)}
+.diamond{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0}
+.drow{display:flex;gap:10px;justify-content:center}
+.node{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:13px;transition:all .25s}
+.node small{font-size:7px;font-weight:normal;opacity:.75}
+.node.L{box-shadow:0 0 12px currentColor;transform:scale(1.06)}
+.node.off{opacity:.3;transform:scale(.94)}
+.n0{color:var(--fg)}.n1{color:#b388ff}.n2{color:var(--cyan)}.n3{color:var(--gold)}
+.axbtn{background:var(--bg);color:var(--fg);border:1px solid var(--line);padding:6px 11px;margin:0;font-size:11px;letter-spacing:1px}
+.axbtn.focus{border-color:var(--gold);color:var(--gold);background:rgba(255,204,68,.08)}
+#chain{line-height:1.9;word-break:break-all}
+.chip{background:var(--bg);border:1px solid var(--line);color:var(--dim);padding:3px 8px;margin:0;font-size:11px;border-radius:3px}
+.chip.ok{color:var(--green);border-color:rgba(124,224,168,.4)}.chip.err{color:var(--red);border-color:rgba(255,90,122,.4)}
+.chip.sel{outline:1px solid var(--gold)}.chip.goal{color:var(--gold);border-color:var(--gold);background:rgba(255,204,68,.1)}
+#proto{max-height:130px;overflow:auto;background:#02040a;border-radius:4px;padding:6px;margin-top:8px;font-size:11px;line-height:1.6}
+#jarvis{font-size:15px;color:var(--cyan);line-height:1.6;min-height:48px}
+#jarvis::before{content:'◉ ';color:var(--cyan);animation:pl 1.6s ease-in-out infinite}
+@keyframes pl{0%,100%{opacity:.35}50%{opacity:1}}
+#ask{background:#02040a;color:var(--fg);border:1px solid var(--line);border-radius:3px;padding:6px 8px;font:inherit;width:min(360px,70%)}
+</style>
+</head>
+<body>
+<h1>◈ VERWALTUNG · WAHRHEIT LIVE</h1>
+<div class="sub">Nur Anzeige. Kein Eingriff. Jeder Wert trägt ein Etikett: <span class="tag m">gemessen</span> = echt, <span class="tag a">abgeleitet</span> = Näherung.</div>
+
+<h2>▸ ASSISTENT</h2>
+<div class="box">
+  <div id="jarvis">Verwaltung startet …</div>
+  <input id="ask" placeholder="frag mich: status · warum · step · handoff · reset · hilfe" autocomplete="off">
+  <button id="bAsk">Senden</button>
+  <select id="stil" style="background:#02040a;color:var(--fg);border:1px solid var(--line);border-radius:3px;padding:6px;font:inherit">
+    <option value="sachlich">Stil: sachlich</option>
+    <option value="hitchcock">Stil: Hitchcock</option>
+    <option value="tarantino">Stil: Tarantino</option>
+  </select>
+  <button id="bVoice" style="color:var(--dim);border-color:var(--line)">🔇 Stimme aus</button>
+  <div class="leg">Kein KI-Modell: Der Assistent formuliert Sätze aus deinen echten Messwerten und der Runtime-Kette. Er meldet sich selbst, wenn sich etwas ändert. Der Stil färbt nur seine Ereignismeldungen mit einem kurzen Satz; Antworten auf deine Fragen bleiben immer sachlich.</div>
+</div>
+
+<h2>▸ DEIN RECHNER (echt)</h2>
+<div class="grid">
+  <div class="card"><div class="k">GRAFIKKARTE</div><div class="v" id="gpu">…</div><span class="tag m">gemessen</span></div>
+  <div class="card"><div class="k">PROZESSOR-KERNE</div><div class="v" id="cores">…</div><span class="tag m">gemessen</span></div>
+  <div class="card"><div class="k">ARBEITSSPEICHER (Browser-Angabe)</div><div class="v" id="ram">…</div><span class="tag m">gemessen</span></div>
+  <div class="card"><div class="k">SPEICHER DIESER SEITE</div><div class="v" id="heap">…</div><span class="tag m">gemessen</span></div>
+</div>
+
+<h2>▸ LIVE</h2>
+<div class="grid">
+  <div class="card"><div class="k">BILDZEIT</div><div class="v" id="ft">…</div><span class="tag m">gemessen</span></div>
+  <div class="card"><div class="k">ZEITZITTERN (Timer kommt zu spät)</div><div class="v" id="jit">…</div><span class="tag m">gemessen</span></div>
+</div>
+
+<h2>▸ ANNAHME DES ALTEN DASHBOARDS GEGEN WIRKLICHKEIT</h2>
+<div class="box">
+  <table>
+    <tr><th>Teil</th><th>Annahme (alt)</th><th>Jetzt</th><th>Abweichung</th><th></th></tr>
+    <tr><td>CPU-Last</td><td>42 %</td><td id="cNow">…</td><td id="cDev">…</td><td><span class="tag a">abgeleitet</span></td></tr>
+    <tr><td>GPU-Druck</td><td>55 %</td><td id="gNow">…</td><td id="gDev">…</td><td><span class="tag a">abgeleitet</span></td></tr>
+    <tr><td>Seiten-RAM</td><td>48 %</td><td id="rNow">…</td><td id="rDev">…</td><td><span class="tag a">abgeleitet</span></td></tr>
+  </table>
+  <div class="leg">CPU aus Zeitzittern, GPU aus Bildzeit gegenüber der besten gesehenen Bildzeit, RAM aus dem Seitenspeicher (nur Chrome/Edge). Näherungen, keine Sensorwerte.</div>
+</div>
+
+<h2>▸ URSACHE → WIRKUNG</h2>
+<div class="box">
+  <canvas id="cv" width="900" height="140"></canvas>
+  <div class="leg"><span style="color:var(--gold)">━ Zeitzittern (Ursache: Prozessor beschäftigt)</span> &nbsp; <span style="color:var(--cyan)">━ Bildzeit (Wirkung)</span> &nbsp; · letzte 30 Sekunden</div>
+  <div id="lag" style="margin-top:8px">Sammle Daten …</div>
+  <button id="burn">⚡ Test: diese Seite 1,5 s belasten</button>
+  <span class="leg">&nbsp;Belastet nur diese Seite, nicht deinen Rechner. Danach siehst du Ursache und Wirkung in der Kurve.</span>
+</div>
+
+<h2>▸ ACHSEN · DISPATCHER</h2>
+<div class="box">
+  <div id="axis-buttons" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+  <div id="axis-focus" class="leg">Klick eine Achse: Sie wird im Baum markiert, mit Pfad und Signal. Es wird nirgends hin navigiert.</div>
+</div>
+
+<h2>▸ LOGIK · Rt(x) = Rt(parent(x)) ∧ R(x) · MESSUNG → R → L → SNAPSHOT → HANDOFF</h2>
+<div class="box">
+  <div id="hand" style="font-size:20px;margin-bottom:4px">…</div>
+  <div class="diamond" id="diamond"></div>
+  <div id="chain">…</div>
+  <div id="logicVerdict" class="leg"></div>
+  <table style="margin-top:10px"><thead><tr><th>sym</th><th>parent</th><th>signal</th><th>Wert</th><th>R</th><th>L</th></tr></thead><tbody id="logicRows"></tbody></table>
+  <div class="leg" style="margin-top:8px">Die Reihenfolge der Prüfkette ist festgelegt und kein Ursachenbeweis. ⊤ nur, wenn jede Ebene ⊤ ist. Nicht messbar = ⊥, nie „bestanden“.</div>
+  <div class="leg" id="snapinfo"></div>
+</div>
+
+<h2>▸ STRUKTUR · PARENT-REIHENFOLGE GEPRÜFT (Modell: Kette)</h2>
+<div class="box">
+  <div id="structV" style="font-size:16px;margin-bottom:6px">…</div>
+  <div id="struct" style="line-height:1.8"></div>
+  <div class="leg">Die Prüfung läuft live aus den Konstanten ORDER, PARENT und SHAPE. Wird die Struktur je durch eine Änderung ungültig, verweigert der HANDOFF.</div>
+</div>
+
+<h2>▸ RUNTIME-KETTE · Rt0 → Rt1 → Rt2 → … → ZIEL</h2>
+<div class="box">
+  <div id="rtchain" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center"></div>
+  <div id="rtdetail" class="leg" style="margin-top:6px"></div>
+  <button id="bStep">▸ STEP: neue Runtime aus der Messung</button>
+  <button id="bHand" style="color:var(--gold);border-color:var(--gold)">⇢ HANDOFF als ZIEL</button>
+  <button id="bReset" style="color:var(--dim);border-color:var(--line)">⟲ RESET</button>
+  <div class="leg">Jede Runtime ist ein eingefrorener Schnappschuss der echten Messung. Neue Runtime entsteht automatisch, wenn sich die Kette ändert (höchstens 1× pro Sekunde), oder per STEP. HANDOFF geht nur, wenn die Kette ⊤ ist.</div>
+  <div id="proto"></div>
+</div>
+
+<div class="sub" style="margin-top:14px">Grün ist hier nicht garantiert. Wahrheit hat Vorrang vor Wohlfühlen. 😉</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const cls=p=>p<60?'ok':p<85?'warn':'err';
+
+// ── echte Angaben ──
+function gpuName(){
+  try{
+    const c=document.createElement('canvas');
+    const g=c.getContext('webgl')||c.getContext('experimental-webgl');
+    if(!g)return 'nicht lesbar';
+    const e=g.getExtension('WEBGL_debug_renderer_info');
+    return e?g.getParameter(e.UNMASKED_RENDERER_WEBGL):g.getParameter(g.RENDERER);
+  }catch(_){return 'nicht lesbar';}
+}
+$('gpu').textContent=gpuName();
+$('cores').textContent=navigator.hardwareConcurrency?navigator.hardwareConcurrency+' Kerne':'nicht lesbar';
+$('ram').textContent=navigator.deviceMemory?'mind. '+navigator.deviceMemory+' GB':'nicht lesbar';
+
+// ── Messung ──
+let ft=16.7,base=Infinity,frames=0,lastF=0,jit=0,lastT=performance.now();
+const H=[];
+
+function frame(now){
+  if(lastF){
+    ft=ft*0.9+(now-lastF)*0.1;
+    if(++frames>30)base=Math.min(base,ft);
+  }
+  lastF=now;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+setInterval(()=>{
+  const n=performance.now();
+  jit=jit*0.8+Math.max(0,n-lastT-100)*0.2;
+  lastT=n;
+},100);
+
+// ── Auswertung (4× pro Sekunde) ──
+function corr(a,b){
+  const n=a.length;if(n<10)return 0;
+  const ma=a.reduce((s,x)=>s+x,0)/n,mb=b.reduce((s,x)=>s+x,0)/n;
+  let sab=0,saa=0,sbb=0;
+  for(let i=0;i<n;i++){const x=a[i]-ma,y=b[i]-mb;sab+=x*y;saa+=x*x;sbb+=y*y;}
+  return saa&&sbb?sab/Math.sqrt(saa*sbb):0;
+}
+function lagAnalyse(){
+  const J=H.map(h=>h.j),F=H.map(h=>h.f);
+  let best={lag:0,r:0};
+  for(let l=0;l<=20;l++){
+    const r=corr(J.slice(0,J.length-l),F.slice(l));
+    if(Math.abs(r)>Math.abs(best.r))best={lag:l,r};
+  }
+  return best;
+}
+function row(idNow,idDev,now,old){
+  const n=$(idNow),d=$(idDev);
+  if(now==null){n.textContent='nicht verfügbar';d.textContent='–';n.className=d.className='';return;}
+  n.textContent=now.toFixed(0)+' %';n.className=cls(now);
+  const dv=now-old;
+  d.textContent=(dv>=0?'+':'')+dv.toFixed(0)+' %';
+  d.className=Math.abs(dv)<10?'ok':Math.abs(dv)<25?'warn':'err';
+}
+function draw(){
+  const cv=$('cv'),g=cv.getContext('2d'),W=cv.width,Ht=cv.height;
+  g.clearRect(0,0,W,Ht);
+  const line=(key,col)=>{
+    const mx=Math.max(1,...H.map(h=>h[key]));
+    g.strokeStyle=col;g.lineWidth=2;g.beginPath();
+    H.forEach((h,i)=>{
+      const x=i/119*W,y=Ht-6-(h[key]/mx)*(Ht-14);
+      i?g.lineTo(x,y):g.moveTo(x,y);
+    });
+    g.stroke();
+  };
+  line('j','#ffcc44');line('f','#5fc8ff');
+}
+setInterval(()=>{
+  H.push({j:jit,f:ft});
+  if(H.length>120)H.shift();
+
+  $('ft').textContent=ft.toFixed(1)+' ms';
+  $('jit').textContent=jit.toFixed(1)+' ms';
+
+  const cpu=clamp(jit/40*100,0,100);
+  const gpu=base<Infinity?clamp((ft/base-1)*100,0,100):0;
+  let ram=null;
+  const pm=performance.memory;
+  if(pm){
+    ram=pm.usedJSHeapSize/pm.jsHeapSizeLimit*100;
+    $('heap').textContent=(pm.usedJSHeapSize/1048576).toFixed(0)+' MB';
+  }else $('heap').textContent='nur Chrome/Edge';
+  row('cNow','cDev',cpu,42);
+  row('gNow','gDev',gpu,55);
+  row('rNow','rDev',ram,48);
+
+  draw();
+  renderLogic({cpu,gpu:base<Infinity?gpu:null,ram,heap:ram,jit,ft,base,cores:navigator.hardwareConcurrency||1});
+  if(H.length>=40){
+    const b=lagAnalyse(),el=$('lag');
+    if(Math.abs(b.r)<0.4){
+      el.innerHTML='Kein klarer Zusammenhang gerade (r='+b.r.toFixed(2)+'). Dein Rechner ist entspannt. Mit dem Test-Knopf kannst du nachhelfen.';
+    }else{
+      el.innerHTML='Wenn der Prozessor beschäftigt ist, folgt die Bildzeit nach ca. <b class="warn">'+(b.lag*0.25).toFixed(2)+' s</b> '+(b.r>0?'mit':'gegenläufig, mit')+' Zusammenhang r='+b.r.toFixed(2)+'.';
+    }
+  }
+},250);
+
+// ── LOGIK-START ──
+const SHAPE=[["N"],["NW","NE"],["W","·","E"],["SW","SE"],["S"]];
+const ORDER=["·","N","NW","NE","W","E","SW","SE","S"];
+const PARENT={"·":null,N:"·",NW:"N",NE:"NW",W:"NE",E:"W",SW:"E",SE:"SW",S:"SE"};
+const SIGNAL={"·":"existenz",N:"cpu",NW:"jit",NE:"ft",W:"gpu",E:"ram",SW:"heap",SE:"cores",S:"gesamt"};
+const COLOR={"·":"n0",N:"n1",NW:"n2",NE:"n3",W:"n3",E:"n3",SW:"n3",SE:"n2",S:"n1"};
+function getR(sym,s){
+  const ok=v=>v!=null&&isFinite(v);   // unbekannt = ⊥
+  switch(sym){
+    case "·":return true;
+    case "N":return ok(s.cpu)&&s.cpu<70;
+    case "NW":return ok(s.jit)&&s.jit<25;
+    case "NE":return isFinite(s.base)&&s.ft<2*s.base;
+    case "W":return ok(s.gpu)&&s.gpu<70;
+    case "E":return ok(s.ram)&&s.ram<80;
+    case "SW":return ok(s.heap)&&s.heap<75;
+    case "SE":return s.cores>=4;
+    case "S":return ok(s.cpu)&&ok(s.ram)&&(s.cpu+s.ram)/2<75;
+  }
+  return false;
+}
+function closeLogic(s){
+  const m={};
+  for(const sym of ORDER){
+    const r=getR(sym,s),p=PARENT[sym];
+    m[sym]={sym,parent:p,R:r,L:p==null?r:(m[p].L&&r),signal:SIGNAL[sym]};
+  }
+  return ORDER.map(x=>m[x]);
+}
+// ── LOGIK-ENDE ──
+
+// ── STRUKTURPRÜFUNG (Parent-Reihenfolge, Zyklen, Breite, Tiefe) ──
+const BREADTH=[1,2,3,2,1];
+function checkStruct(parent,order,shape,breadth){
+  const topo=order.map((sym,i)=>{const p=parent[sym]??null,pi=p==null?-1:order.indexOf(p);return{sym,p,pi,i,ok:p==null||(pi!==-1&&pi<i)};});
+  const cyc=[];
+  for(const st of order){const seen=new Set();let c=st;while(c!=null){if(seen.has(c)){cyc.push(st);break;}seen.add(c);c=parent[c]??null;if(seen.size>20)break;}}
+  const depth={};
+  const dep=(x,seen)=>{
+    if(depth[x]!==undefined)return depth[x];
+    if(seen.has(x))return -1;
+    seen.add(x);
+    const p=parent[x]??null;
+    if(p==null)return depth[x]=0;
+    const d=dep(p,seen);
+    return depth[x]=d>=0?d+1:-1;
+  };
+  order.forEach(x=>dep(x,new Set()));
+  const rows=shape.map((r,i)=>({row:i,n:r.length,b:breadth[i],ok:r.length===breadth[i]}));
+  const same=shape.flat().slice().sort().join()===order.slice().sort().join();
+  const ok=topo.every(t=>t.ok)&&cyc.length===0&&rows.every(r=>r.ok)&&same;
+  return{topo,cyc,depth,rows,same,ok};
+}
+const STRUCT=checkStruct(PARENT,ORDER,SHAPE,BREADTH);
+(function(){
+  const t=b=>b?'<span class="ok">⊤</span>':'<span class="err">⊥</span>';
+  const br=STRUCT.topo.filter(x=>!x.ok).map(x=>x.sym).join(', ');
+  $('structV').innerHTML=STRUCT.ok?'<span class="ok">⊤ STRUKTUR GEPRÜFT</span>':'<span class="err">⊥ STRUKTUR UNGÜLTIG</span>';
+  $('struct').innerHTML=
+    t(STRUCT.topo.every(x=>x.ok))+' ORDER topologisch sortiert (parentIdx &lt; symIdx)'+(br?' · Bruch bei '+br:'')+'<br>'+
+    t(STRUCT.cyc.length===0)+' keine Zyklen'+(STRUCT.cyc.length?' · bei '+STRUCT.cyc.join(', '):'')+'<br>'+
+    t(STRUCT.rows.every(r=>r.ok))+' BREADTH '+BREADTH.join('-')+' stimmt mit SHAPE überein<br>'+
+    t(STRUCT.same)+' SHAPE und ORDER enthalten dieselben 9 Symbole<br>'+
+    '<span style="color:var(--dim)">Tiefe: '+ORDER.map(x=>x+'='+STRUCT.depth[x]).join(' · ')+'</span>';
+})();
+
+
+let AXIS_FOCUS=null,LAST=null;
+function fmt(v){return v==null||!isFinite(v)?'nicht messbar':(+v).toFixed(1);}
+function renderLogic(s){
+  LAST=s;
+  const lv=closeLogic(s),handoff=lv.every(x=>x.L),brk=lv.find(x=>!x.L);
+  $('diamond').innerHTML=SHAPE.map(row=>'<div class="drow">'+row.map(sym=>{
+    const n=lv.find(x=>x.sym===sym);
+    return '<div class="node '+COLOR[sym]+' '+(n.L?'L':'off')+'" style="'+(AXIS_FOCUS===sym?'outline:2px solid var(--gold);outline-offset:3px':'')+'" title="'+sym+' · parent='+(n.parent??'∅')+'"><span>'+sym+'</span><small>'+(n.L?'⊤':'⊥')+'</small></div>';
+  }).join('')+'</div>').join('');
+  $('chain').innerHTML=lv.map(x=>'<span class="'+(x.L?'ok':'err')+'">'+x.sym+':'+(x.L?'⊤':'⊥')+'</span>').join('<span style="color:var(--dim);margin:0 5px">∧</span>');
+  $('logicRows').innerHTML=lv.map(x=>'<tr style="'+(x.L?'':'opacity:.55')+'"><td>'+x.sym+'</td><td style="color:var(--dim)">'+(x.parent??'∅')+'</td><td style="color:var(--dim)">'+x.signal+'</td><td>'+(x.sym==='·'?'–':fmt(s[x.signal==='gesamt'?'cpu':x.signal]))+'</td><td class="'+(x.R?'ok':'err')+'">'+(x.R?'⊤':'⊥')+'</td><td class="'+(x.L?'ok':'err')+'">'+(x.L?'⊤':'⊥')+'</td></tr>').join('');
+  if(handoff){
+    $('hand').innerHTML='<span class="ok">⊤ Übergabe erlaubt</span>';
+    $('logicVerdict').textContent='Alle Ebenen tragen. Mit „HANDOFF als ZIEL“ wird die Runtime eingefroren und übergeben.';
+  }else{
+    $('hand').innerHTML='<span class="err">⊥ Übergabe verweigert</span>';
+    const sig=brk.signal==='gesamt'?'cpu':brk.signal;
+    $('logicVerdict').innerHTML='Erste Ebene, die nicht trägt: <b class="err">'+brk.sym+'</b> ('+brk.signal+(s[sig]==null?' · nicht messbar':'')+'). Alles dahinter in der Prüfkette bleibt ⊥.';
+  }
+  $('snapinfo').textContent=GOAL?('ZIEL eingefroren: Rt'+GOAL.id+' ('+GOAL.t+'), liegt als window.VERWALTUNG bereit.'):'Noch kein ZIEL übergeben.';
+  rtObserve(lv,s);
+}
+window.VERWALTUNG=null;
+
+
+// ── RUNTIME-KETTE: Rt(i+1) = Rt(i) + Zustand(i), jede Runtime eingefroren ──
+const RT=[];let GOAL=null,RTFOCUS=null,lastKey=null,lastAuto=0;
+function plog(kind,msg){
+  const d=document.createElement('div');
+  d.innerHTML='<span style="color:var(--dim)">'+new Date().toLocaleTimeString('de-DE')+'</span> <span class="'+(kind==='ziel'?'warn':kind==='refuse'?'err':'')+'" style="text-transform:uppercase">'+kind+'</span> '+msg;
+  const p=$('proto');p.appendChild(d);
+  while(p.children.length>120)p.removeChild(p.firstChild);
+  p.scrollTop=p.scrollHeight;
+  if(kind==='ziel')sayE('goal',null,'Übergabe erfolgt. Die Runtime ist eingefroren und als Ziel bereitgestellt.');
+  if(kind==='refuse')sayE('refuse',null,'Übergabe verweigert. Die Kette trägt nicht.');
+}
+function mkRt(lv,s,why){
+  const prev=RT.length?RT[RT.length-1]:null;
+  const r=Object.freeze({id:prev?prev.id+1:0,t:new Date().toLocaleTimeString('de-DE'),levels:lv.map(x=>Object.freeze({...x})),state:Object.freeze({...s}),chain:lv.map(x=>x.L?'⊤':'⊥').join('∧'),logisch:lv.every(x=>x.L)});
+  RT.push(r);if(RT.length>60)RT.shift();
+  const f=lv.find(x=>!x.L);
+  plog(why,(prev?'Rt'+prev.id+' → ':'')+'Rt'+r.id+' · '+(r.logisch?'⊤ logisch':'⊥ offen, bricht bei '+f.sym));
+  RTFOCUS=r.id;renderRt();jarvisOnRt(r,prev,why);return r;
+}
+function rtObserve(lv,s){
+  const key=lv.map(x=>x.L?1:0).join('');
+  const now=performance.now();
+  if(key!==lastKey&&(RT.length===0||now-lastAuto>1000)){lastKey=key;lastAuto=now;mkRt(lv,s,RT.length?'auto':'start');}
+}
+function renderRt(){
+  const box=$('rtchain');box.innerHTML='';
+  RT.forEach(r=>{
+    const b=document.createElement('button');
+    b.className='chip '+(r.logisch?'ok':'err')+(r.id===RTFOCUS?' sel':'');
+    b.textContent='Rt'+r.id+' '+(r.logisch?'⊤':'⊥');
+    b.onclick=()=>{RTFOCUS=r.id;renderRt();};
+    box.appendChild(b);
+    const a=document.createElement('span');a.style.color='var(--dim)';a.textContent='▸';box.appendChild(a);
+  });
+  const z=document.createElement('span');z.className='chip'+(GOAL?' goal':'');
+  z.textContent=GOAL?'ZIEL · Rt'+GOAL.id+' ⊤':'ZIEL';box.appendChild(z);
+  const f=RT.find(r=>r.id===RTFOCUS);
+  $('rtdetail').innerHTML=f?'Rt'+f.id+' · '+f.t+' · '+f.chain.replace(/⊤/g,'<span class="ok">⊤</span>').replace(/⊥/g,'<span class="err">⊥</span>'):'';
+}
+$('bStep').onclick=()=>{if(LAST)mkRt(closeLogic(LAST),LAST,'step');};
+$('bHand').onclick=()=>{
+  if(!LAST)return;
+  if(!STRUCT.ok){plog('refuse','HANDOFF verweigert · Parent-Struktur ungültig');return;}
+  const r=mkRt(closeLogic(LAST),LAST,'step');
+  if(!r.logisch){plog('refuse','HANDOFF verweigert · Rt'+r.id+' ist ⊥ (bricht bei '+r.levels.find(x=>!x.L).sym+')');return;}
+  GOAL=r;window.VERWALTUNG={id:r.id,t:r.t,runtime:r.levels,state:r.state,chain:r.chain,handoff:true};
+  plog('ziel','HANDOFF · Rt'+r.id+' eingefroren als ZIEL · '+r.chain);
+  try{if(window.parent!==window)window.parent.postMessage({type:'verwaltung.handoff',snapshot:window.VERWALTUNG},'*');}catch(_){}
+  renderRt();renderLogic(LAST);
+};
+$('bReset').onclick=()=>{RT.length=0;GOAL=null;RTFOCUS=null;lastKey=null;window.VERWALTUNG=null;$('proto').innerHTML='';plog('sys','RESET · neue Messung, neue Rt0');renderRt();if(LAST)renderLogic(LAST);};
+
+
+// ── ASSISTENT: Sätze aus echten Werten, keine KI ──
+let VOICE=false;
+function say(t){
+  $('jarvis').textContent=t;
+  plog('assistent',t);
+  try{if(VOICE&&window.speechSynthesis){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='de-DE';speechSynthesis.speak(u);}}catch(_){}
+}
+function why(sym,s){
+  const f=(v,u)=>v==null||!isFinite(v)?'nicht messbar':(+v).toFixed(1)+u;
+  switch(sym){
+    case 'N':return 'CPU-Näherung '+f(s.cpu,' %')+', Grenze 70';
+    case 'NW':return 'Zeitzittern '+f(s.jit,' ms')+', Grenze 25';
+    case 'NE':return isFinite(s.base)?'Bildzeit '+f(s.ft,' ms')+', Grenze '+(2*s.base).toFixed(1):'Bildzeit-Basis noch nicht bekannt';
+    case 'W':return 'GPU-Druck '+f(s.gpu,' %')+', Grenze 70';
+    case 'E':return 'Seitenspeicher '+f(s.ram,' %')+', Grenze 80';
+    case 'SW':return 'Heap '+f(s.heap,' %')+', Grenze 75';
+    case 'SE':return 'Kerne '+s.cores+', gefordert mindestens 4';
+    case 'S':return 'CPU und RAM zusammen im Mittel zu hoch oder nicht messbar';
+  }
+  return sym;
+}
+function jarvisOnRt(r,prev,why_){
+  const b=r.levels.find(x=>!x.L),w=b?why(b.sym,r.state):'';
+  if(!prev)sayE('online',b&&b.sym,r.logisch?'Verwaltung online. Erste Messung steht, alle Ebenen tragen.':'Verwaltung online. Die Kette trägt noch nicht, erste Ebene: '+b.sym+' ('+w+'). Ich messe weiter.');
+  else if(prev.logisch&&!r.logisch)sayE('break',b&&b.sym,'Achtung: Die Kette ist gebrochen bei '+b.sym+' ('+w+'). Übergabe gesperrt.');
+  else if(!prev.logisch&&r.logisch)sayE('stable',null,'Wieder stabil. Alle Ebenen tragen, Übergabe ist möglich.');
+  else if(why_==='step')say('Neue Runtime Rt'+r.id+': '+(r.logisch?'alle Ebenen tragen.':'weiter offen bei '+b.sym+' ('+w+').'));
+}
+function ask(q){
+  q=q.trim().toLowerCase();if(!q)return;
+  const lv=LAST?closeLogic(LAST):null;
+  if(!lv){say('Ich habe noch keine Messung. Gib mir einen Moment.');return;}
+  const b=lv.find(x=>!x.L);
+  if(q==='status')say(b?'Die Kette trägt nicht. Erste Ebene, die fällt: '+b.sym+'. Aktuell Rt'+RT[RT.length-1].id+', '+RT.length+' Runtimes im Speicher.':'Alle Ebenen tragen. Übergabe möglich. Aktuell Rt'+RT[RT.length-1].id+'.');
+  else if(q==='warum')say(b?b.sym+' fällt, weil: '+why(b.sym,LAST)+'.':'Es fällt nichts, alle Ebenen tragen.');
+  else if(q==='step')$('bStep').click();
+  else if(q==='handoff')$('bHand').click();
+  else if(q==='reset')$('bReset').click();
+  else if(q==='hilfe')say('Ich verstehe: status, warum, step, handoff, reset. Sonst melde ich mich von selbst, wenn sich etwas ändert.');
+  else say('Das habe ich nicht verstanden. Sag status, warum, step, handoff, reset oder hilfe.');
+}
+$('ask').addEventListener('keydown',e=>{if(e.key==='Enter'){ask(e.target.value);e.target.value='';}});
+$('bAsk').onclick=()=>{const i=$('ask');ask(i.value);i.value='';};
+$('bVoice').onclick=()=>{
+  VOICE=!VOICE;
+  $('bVoice').textContent=VOICE?'🔊 Stimme an':'🔇 Stimme aus';
+  if(VOICE&&!window.speechSynthesis)say('Dein Browser hat keine Sprachausgabe.');
+  else if(VOICE)say('Stimme ist an.');
+};
+
+// ── STIL: nur ein kurzer Zusatzsatz bei Ereignissen, nie bei Antworten ──
+let STIL='sachlich',CHAP=0;
+const FL={
+  hitchcock:{online:'Alles ruhig. Fast zu ruhig.',break:'Das Unheil kündigt sich selten an. Diesmal hat es einen Namen: {s}.',stable:'Die Spannung löst sich. Vorerst.',goal:'Die Übergabe ist vollzogen. Niemand hat etwas gesehen.',refuse:'Manche Türen bleiben besser verschlossen.'},
+  tarantino:{online:'Kapitel {n}: Die Messung.',break:'Kapitel {n}: {s} dreht durch.',stable:'Kapitel {n}: Die Rückkehr. Ganz ruhig, ganz cool.',goal:'Sauber. Wie bestellt.',refuse:'Nein. Nicht so.'}
+};
+function fl(ev,sym){
+  const f=FL[STIL];if(!f||!f[ev])return '';
+  let x=f[ev];if(x.includes('{n}'))x=x.replace('{n}',++CHAP);
+  return ' '+x.replace('{s}',sym||'?');
+}
+function sayE(ev,sym,t){say(t+fl(ev,sym));}
+$('stil').onchange=e=>{STIL=e.target.value;CHAP=0;say(STIL==='sachlich'?'Stil sachlich.':'Stil '+(STIL==='hitchcock'?'Hitchcock':'Tarantino')+'. Ich bleibe bei den Fakten und färbe nur die Meldungen.');};
+// ── ACHSEN-DISPATCHER (lokal; axi-lage.json optional, wenn über einen Server geöffnet) ──
+const ROUTE={"·":"root",N:"nord",NW:"nord-west",NE:"nord-ost",W:"west",E:"ost",SW:"sued-west",SE:"sued-ost",S:"sued"};
+const AXI_LAGE=Object.fromEntries(ORDER.map(a=>[a,{route:'/rt/'+ROUTE[a],parent:PARENT[a],signal:SIGNAL[a]}]));
+async function loadLage(){
+  try{const r=await fetch('axi-lage.json',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();return j&&Object.keys(j).length?j:AXI_LAGE;}
+  catch(_){return AXI_LAGE;}
+}
+function axiLink(a,lage){const e=lage[a]||AXI_LAGE[a]||{};return{axis:a,route:e.route||'?',parent:e.parent??PARENT[a]??null,signal:e.signal||SIGNAL[a]||'?'};}
+function focusAxis(a,lage){
+  AXIS_FOCUS=AXIS_FOCUS===a?null:a;
+  document.querySelectorAll('.axbtn').forEach(b=>b.classList.toggle('focus',b.dataset.axis===AXIS_FOCUS));
+  const box=$('axis-focus');
+  if(AXIS_FOCUS===null){box.textContent='Klick eine Achse: Sie wird im Baum markiert, mit Pfad und Signal. Es wird nirgends hin navigiert.';}
+  else{
+    const i=axiLink(a,lage),path=[];let c=a;while(c!=null){path.unshift(c);c=PARENT[c];}
+    box.innerHTML='<b class="warn">'+a+'</b> · Label <span style="color:var(--cyan)">'+i.route+'</span> · parent <b>'+(i.parent??'∅')+'</b> · Signal <b>'+i.signal+'</b><br>Pfad: '+path.join(' → ');
+  }
+  if(LAST)renderLogic(LAST);
+}
+loadLage().then(lage=>{
+  const box=$('axis-buttons');
+  Object.keys(lage).forEach(a=>{
+    const b=document.createElement('button');
+    b.className='axbtn';b.dataset.axis=a;b.textContent=a;
+    b.onclick=()=>focusAxis(a,lage);
+    box.appendChild(b);
+  });
+});
+$('burn').addEventListener('click',()=>{
+  const end=performance.now()+1500;
+  while(performance.now()<end){Math.sqrt(Math.random());}
+});
+</script>
+</body>
+</html>
